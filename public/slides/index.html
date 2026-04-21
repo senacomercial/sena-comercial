@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Sena · MaVIS — Deck de Oferta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700;1,800;1,900&family=Montserrat:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#000;color:#fff;font-family:'Montserrat',sans-serif;}
+  deck-stage{--deck-bg:#000;}
+  section{background:#000;color:#fff;padding:88px 112px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+  section.pad-tight{padding:72px 96px;}
+  .over{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#C5A059;}
+  .over.ign{color:#E85D04;}
+  .h1{font-family:'Playfair Display',serif;font-weight:800;font-size:108px;line-height:.98;letter-spacing:-.02em;margin:0;color:#fff;}
+  .h1.sans{font-family:'Montserrat',sans-serif;font-weight:900;text-transform:uppercase;font-size:88px;letter-spacing:-.015em;}
+  .h2{font-family:'Playfair Display',serif;font-weight:700;font-size:64px;line-height:1.05;letter-spacing:-.01em;margin:0;color:#fff;}
+  .lede{font-family:'Montserrat',sans-serif;font-size:26px;line-height:1.5;color:rgba(255,255,255,.75);margin:0;max-width:1200px;}
+  .ital{font-family:'Playfair Display',serif;font-style:italic;font-weight:800;color:#E85D04;}
+  .ital.gold{color:#C5A059;}
+  .slide-foot{position:absolute;bottom:44px;left:112px;right:112px;display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.1em;color:rgba(255,255,255,.4);text-transform:uppercase;}
+  .wolf{height:56px;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+  .grid-2{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:center;}
+  .mcard{background:#0A0A0A;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:36px 36px 40px;}
+  .mcard .mnum{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:72px;color:#E85D04;letter-spacing:-.03em;line-height:1;margin:14px 0 14px;font-variant-numeric:tabular-nums;}
+  .mcard .mnum.gold{color:#C5A059;}
+  .mcard .mlbl{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#C5A059;}
+  .mcard .msub{font-family:'Montserrat',sans-serif;font-size:17px;color:rgba(255,255,255,.65);line-height:1.5;}
+  .filter{border-left:4px solid #E85D04;padding:32px 40px;background:rgba(232,93,4,.06);max-width:1100px;}
+  .filter .ft{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#E85D04;margin-bottom:24px;}
+  .fstep{display:flex;align-items:flex-start;gap:20px;font-family:'Montserrat',sans-serif;font-size:22px;color:#f0f0f0;line-height:1.5;margin-bottom:18px;}
+  .fstep:last-child{margin:0;}
+  .fnum{flex-shrink:0;background:#E85D04;color:#000;font-weight:900;font-size:18px;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+  .fstep strong{color:#fff;}
+  .bullets{list-style:none;padding:0;margin:28px 0 0;display:flex;flex-direction:column;gap:18px;}
+  .bullets li{font-family:'Montserrat',sans-serif;font-size:22px;color:#f0f0f0;line-height:1.5;display:flex;gap:16px;}
+  .bullets li::before{content:'✓';color:#C5A059;font-weight:900;font-size:22px;flex-shrink:0;}
+  .bullets li strong{color:#fff;}
+  .pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:48px;}
+  .pcard{background:#0A0A0A;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:36px 34px 40px;position:relative;}
+  .pcard.feat{background:linear-gradient(180deg,#1a1408,#0A0A0A);border-color:rgba(197,160,89,.5);}
+  .pbadge{position:absolute;top:20px;right:20px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;letter-spacing:.22em;color:#000;background:#C5A059;padding:6px 14px;border-radius:2px;}
+  .pover{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#C5A059;}
+  .pname{font-family:'Playfair Display',serif;font-weight:700;font-size:38px;margin:14px 0 20px;color:#fff;letter-spacing:-.01em;line-height:1.1;}
+  .pprice{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;}
+  .pprice .old{font-family:'JetBrains Mono',monospace;font-size:22px;color:rgba(255,255,255,.3);text-decoration:line-through;}
+  .pprice .new{font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:700;color:#C5A059;letter-spacing:-.02em;}
+  .pcard:not(.feat) .pprice .new{color:#fff;}
+  .pmode{font-family:'Montserrat',sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:28px;}
+  .pincludes{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;}
+  .pincludes li{font-family:'Montserrat',sans-serif;font-size:16px;color:#eee;line-height:1.45;display:flex;gap:10px;}
+  .pincludes li::before{content:'✓';color:#C5A059;font-weight:900;flex-shrink:0;}
+  .bg-photo{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0;}
+  .bg-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.92) 100%);}
+  .bg-content{position:relative;z-index:1;}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(197,160,89,.5),transparent);margin:24px 0;}
+  .quote{font-family:'Playfair Display',serif;font-style:italic;font-weight:700;font-size:46px;line-height:1.25;color:#fff;margin:0;max-width:1400px;letter-spacing:-.005em;}
+  .quote-small{font-family:'Montserrat',sans-serif;font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:#C5A059;margin-top:36px;font-weight:700;}
+  .inline-stat{display:flex;gap:60px;margin-top:48px;}
+  .inline-stat .is{display:flex;flex-direction:column;gap:6px;}
+  .inline-stat .is .n{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:54px;color:#C5A059;letter-spacing:-.02em;line-height:1;}
+  .inline-stat .is .l{font-family:'Montserrat',sans-serif;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);}
+</style>
+</head>
+<body>
+
+<deck-stage width="1920" height="1080">
+
+  <!-- 01 CAPA -->
+  <section data-label="Capa">
+    <div class="bg-photo" style="background-image:url(/assets/brand-racing-white-yellow.png)"></div>
+    <div class="bg-content" style="display:flex;flex-direction:column;justify-content:space-between;height:100%;padding-bottom:40px;">
+      <div>
+        <img src="/assets/wolf-mark-white-transparent.png" class="wolf" alt="">
+        <div class="over" style="margin-top:20px">SENA COMERCIAL · ESCUDERIA DE ESTRUTURAÇÃO</div>
+      </div>
+      <div>
+        <div class="over ign" style="font-size:16px;margin-bottom:28px">PROPOSTA — ESTRUTURAÇÃO ESTRATÉGICA DIAGNÓSTICA · 2026</div>
+        <h1 class="h1" style="font-size:130px;">Brigamos por cada<br/><span class="ital">milésimo</span> que te coloca no <span class="ital gold">pódio.</span></h1>
+        <div class="lede" style="margin-top:38px;max-width:1100px;font-size:28px;">Proposta de estruturação comercial · Máquina de Vendas Imobiliárias da Sena</div>
+      </div>
+    </div>
+    <div class="slide-foot"><span>SENA / MaVIS / V1.0</span><span>CONFIDENCIAL</span></div>
+  </section>
+
+  <!-- 02 TESE -->
+  <section data-label="A Tese">
+    <div class="over">TESE DE MERCADO</div>
+    <h1 class="h1" style="margin-top:22px;max-width:1500px;">O corretor<br/>não tem falta de leads.<br/>Tem <span class="ital">excesso de Leads Inertes.</span></h1>
+    <div class="lede" style="margin-top:44px;max-width:1300px;">Agências são pagas para entregar o menor CPL possível. Para isso, removem todas as barreiras de entrada — atraem curiosos sem crédito, sem intenção, sem prazo. O seu WhatsApp vira depósito de vácuo. Seu time trabalha 4 horas por dia respondendo gente que nunca vai comprar.</div>
+    <div class="inline-stat">
+      <div class="is"><div class="n" style="color:#E85D04">R$ 14</div><div class="l">CPL SEM FILTRO · CURIOSO BARATO</div></div>
+      <div class="is"><div class="n" style="color:#E85D04">4h+</div><div class="l">/ DIA EM LEAD INERTE</div></div>
+      <div class="is"><div class="n">0,8%</div><div class="l">TAXA DE FECHAMENTO MÉDIA</div></div>
+    </div>
+    <div class="slide-foot"><span>02 · TESE DE MERCADO</span><span>SENA</span></div>
+  </section>
+
+  <!-- 03 MECANISMO -->
+  <section data-label="Mecanismo Único">
+    <div class="over ign">MECANISMO ÚNICO</div>
+    <h1 class="h1" style="margin-top:22px;max-width:1500px;">A Sena instala um<br/><span class="ital gold">Filtro de Intencionalidade</span><br/>Pós-Clique.</h1>
+    <div class="lede" style="margin-top:40px;max-width:1200px;">Três pilares plug-and-play. O WhatsApp só é desbloqueado para quem passa pelo pedágio. Curioso para, comprador avança.</div>
+    <div class="filter" style="margin-top:54px;max-width:1500px;">
+      <div class="ft">O PROTOCOLO MaVIS</div>
+      <div class="fstep"><div class="fnum">1</div><div><strong>Atração com Fricção</strong> — anúncios que exigem clique consciente. Quem não tem intenção real, sai antes.</div></div>
+      <div class="fstep"><div class="fnum">2</div><div><strong>Qualificação Síncrona</strong> — pedágio de 3 perguntas (Renda · Prazo · Localização) antes do atendimento.</div></div>
+      <div class="fstep"><div class="fnum">3</div><div><strong>Fechamento por Encantamento</strong> — postura ativa que transforma visita em contrato assinado.</div></div>
+    </div>
+    <div class="slide-foot"><span>03 · MECANISMO ÚNICO</span><span>SENA</span></div>
+  </section>
+
+  <!-- 04 PROVA -->
+  <section data-label="Prova">
+    <div class="grid-2" style="height:100%;">
+      <div>
+        <div class="over">RESULTADO · CRAVADO</div>
+        <h1 class="h1" style="margin-top:22px;font-size:88px;">Não vendemos métrica de vaidade. Vendemos <span class="ital gold">contrato assinado.</span></h1>
+        <div class="lede" style="margin-top:36px">📌 <strong style="color:#C5A059">Caso Anderson Gusmão.</strong> R$ 300 investidos. 1 semana. 11 visitas hiperqualificadas. R$ 1.000.000 em vendas fechadas.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <div class="mcard"><div class="mlbl">CPL MaVIS</div><div class="mnum gold">R$ 27</div><div class="msub">–64% vs benchmark</div></div>
+        <div class="mcard"><div class="mlbl">Conversão</div><div class="mnum gold">5,0×</div><div class="msub">vs lead inerte</div></div>
+        <div class="mcard"><div class="mlbl">Visitas</div><div class="mnum">11</div><div class="msub">qualificadas · 7 dias</div></div>
+        <div class="mcard"><div class="mlbl">Fechamento</div><div class="mnum">30d</div><div class="msub">imóvel autônomo</div></div>
+      </div>
+    </div>
+    <div class="slide-foot"><span>04 · PROVA DE PISTA</span><span>SENA</span></div>
+  </section>
+
+  <!-- 05 METODOLOGIA -->
+  <section data-label="Metodologia">
+    <div class="over">METODOLOGIA · ESTRUTURAÇÃO ESTRATÉGICA DIAGNÓSTICA</div>
+    <h1 class="h1" style="margin-top:22px;">Telemetria. Box. <span class="ital">Sinal verde.</span></h1>
+    <div class="grid-3" style="margin-top:56px;">
+      <div class="mcard">
+        <div class="mlbl" style="color:#E85D04">FASE 1 · AUDITORIA</div>
+        <div class="mnum" style="font-size:46px;margin-top:20px">Diagnóstico 360°</div>
+        <ul class="bullets" style="margin-top:16px;gap:12px">
+          <li style="font-size:17px"><strong>Marketing</strong> e criativos auditados</li>
+          <li style="font-size:17px"><strong>Tráfego</strong> e passagem do bastão</li>
+          <li style="font-size:17px"><strong>Atendimento</strong>, calls e visitas avaliados</li>
+        </ul>
+      </div>
+      <div class="mcard">
+        <div class="mlbl" style="color:#E85D04">FASE 2 · MAPEAMENTO</div>
+        <div class="mnum" style="font-size:46px;margin-top:20px">Gargalos</div>
+        <ul class="bullets" style="margin-top:16px;gap:12px">
+          <li style="font-size:17px"><strong>Relatório</strong> dos gargalos identificados</li>
+          <li style="font-size:17px"><strong>Plano de ação</strong> cravado em KPI</li>
+          <li style="font-size:17px"><strong>Roadmap</strong> de implantação priorizado</li>
+        </ul>
+      </div>
+      <div class="mcard" style="border-color:rgba(197,160,89,.4)">
+        <div class="mlbl">FASE 3 · ENTREGA</div>
+        <div class="mnum gold" style="font-size:46px;margin-top:20px">Validados</div>
+        <ul class="bullets" style="margin-top:16px;gap:12px">
+          <li style="font-size:17px"><strong>3 criativos</strong> validados pela Sena</li>
+          <li style="font-size:17px"><strong>1 LP</strong> validada para conversão</li>
+          <li style="font-size:17px"><strong>Call de devolutiva</strong> com Airton</li>
+        </ul>
+      </div>
+    </div>
+    <div class="slide-foot"><span>05 · METODOLOGIA</span><span>SENA</span></div>
+  </section>
+
+  <!-- 06 OFERTA -->
+  <section data-label="Oferta">
+    <div class="over">PRECIFICAÇÃO · ESTRUTURAÇÃO ESTRATÉGICA DIAGNÓSTICA</div>
+    <h1 class="h1" style="margin-top:22px">Do diagnóstico ao <span class="ital gold">sinal verde.</span></h1>
+    <div class="lede" style="margin-top:28px;max-width:1300px">Auditoria completa da sua operação em 30 a 60 dias — marketing, criativos, tráfego, comercial, atendimento, calls e visitas. Entregamos relatório, plano de ação, 3 criativos e 1 LP validados.</div>
+    <div class="pricing">
+      <div class="pcard">
+        <div class="pover">PARCELADO · CARTÃO</div>
+        <div class="pname">6× no cartão</div>
+        <div class="pprice"><span class="new" style="font-size:36px">6× R$ 2.000</span></div>
+        <div class="pmode">= R$ 12.000 no cartão</div>
+        <ul class="pincludes">
+          <li>Auditoria 360° da operação</li>
+          <li>Marketing, criativos e tráfego</li>
+          <li>Comercial, atendimento, calls e visitas</li>
+          <li>Relatório dos gargalos identificados</li>
+          <li>Plano de ação em KPI + Roadmap</li>
+          <li>3 criativos + 1 LP validados</li>
+        </ul>
+      </div>
+      <div class="pcard feat">
+        <div class="pbadge">DIAGNÓSTICO</div>
+        <div class="pover">PARCELADO · BOLETO / PIX</div>
+        <div class="pname">12× no boleto</div>
+        <div class="pprice"><span class="old">R$ 18.000</span><span class="new">12× R$ 1.000</span></div>
+        <div class="pmode">= R$ 12.000 total</div>
+        <ul class="pincludes">
+          <li>Auditoria 360° da operação</li>
+          <li>Marketing, criativos e tráfego</li>
+          <li>Comercial, atendimento, calls e visitas</li>
+          <li>Relatório dos gargalos identificados</li>
+          <li>Plano de ação em KPI + Roadmap</li>
+          <li>3 criativos + 1 LP validados</li>
+        </ul>
+      </div>
+      <div class="pcard">
+        <div class="pover">À VISTA</div>
+        <div class="pname">Pagamento único</div>
+        <div class="pprice"><span class="old">R$ 18.000</span><span class="new" style="color:#fff">R$ 12.000</span></div>
+        <div class="pmode">PIX ou transferência</div>
+        <ul class="pincludes">
+          <li>Auditoria 360° da operação</li>
+          <li>Marketing, criativos e tráfego</li>
+          <li>Comercial, atendimento, calls e visitas</li>
+          <li>Relatório dos gargalos identificados</li>
+          <li>Plano de ação em KPI + Roadmap</li>
+          <li>3 criativos + 1 LP validados</li>
+        </ul>
+      </div>
+    </div>
+    <div class="slide-foot"><span>06 · OFERTA</span><span>SENA</span></div>
+  </section>
+
+  <!-- 07 FECHAMENTO -->
+  <section data-label="Fechamento">
+    <div class="bg-photo" style="background-image:url(/assets/airton-portrait.png);background-position:center 25%"></div>
+    <div class="bg-content" style="max-width:1500px;display:flex;flex-direction:column;justify-content:space-between;height:100%;padding-bottom:40px;">
+      <div>
+        <img src="/assets/wolf-mark-white-transparent.png" class="wolf" alt="">
+        <div class="over ign" style="margin-top:20px">ESTRUTURE A SUA MÁQUINA</div>
+      </div>
+      <div>
+        <h1 class="h1" style="font-size:118px">Do diagnóstico<br/>ao <span class="ital gold">sinal verde.</span></h1>
+        <div class="lede" style="margin-top:40px;max-width:1200px;font-size:28px">Brigamos por cada milésimo. Sem enrolação. Sem desperdício. Resultado cravado em dados — até a sua operação rodar sozinha.</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:15px;color:rgba(255,255,255,.45);letter-spacing:.14em;margin-top:56px;text-transform:uppercase">Sena acompanha no máximo 3 mentorados por ciclo · 2026</div>
+      </div>
+    </div>
+    <div class="slide-foot"><span>07 · FECHAMENTO</span><span style="color:#C5A059">SENA / MaVIS</span></div>
+  </section>
+
+</deck-stage>
+
+<script src="./deck-stage.js"></script>
+</body>
+</html>

@@ -1,3 +1,5 @@
+import { asset } from '../utils.js';
+
 function FooterCol({ title, links }) {
   return (
     <div>
@@ -19,7 +21,7 @@ export default function Footer() {
       <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 40 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-            <img src="/assets/wolf-mark-white-transparent.png" alt="" style={{ height: 40 }} />
+            <img src={asset('wolf-mark-white-transparent.png')} alt="" style={{ height: 40 }} />
             <span style={{ fontFamily: '"Playfair Display",serif', fontWeight: 700, letterSpacing: '.2em', fontSize: 18, color: '#fff' }}>SENA</span>
           </div>
           <div style={{ fontFamily: 'Montserrat,sans-serif', fontSize: 12, color: 'rgba(255,255,255,.5)', lineHeight: 1.6, maxWidth: 260 }}>

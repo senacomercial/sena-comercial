@@ -1,4 +1,5 @@
 import { CTAButton, Overline, Highlight } from './Primitives.jsx';
+import { asset } from '../utils.js';
 
 function MiniStat({ num, label }) {
   return (
@@ -13,7 +14,7 @@ export default function Hero() {
   return (
     <section id="top" style={{
       position: 'relative', minHeight: '86vh',
-      backgroundImage: 'linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.95) 100%), url(/assets/brand-racing-suit-gold.png)',
+      backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.95) 100%), url(${asset('brand-racing-suit-gold.png')})`,
       backgroundSize: 'cover', backgroundPosition: 'center',
       display: 'flex', alignItems: 'center', padding: '80px 32px'
     }}>

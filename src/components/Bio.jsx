@@ -1,4 +1,5 @@
 import { Overline, Highlight } from './Primitives.jsx';
+import { asset } from '../utils.js';
 
 const numbers = [
   { n: 'R$ 303M', l: 'vendidos como corretor' },
@@ -14,7 +15,7 @@ export default function Bio() {
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,520px) 1fr', minHeight: 720 }}>
         {/* LEFT — full-bleed portrait */}
         <div style={{
-          backgroundImage: 'linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.85) 100%), url(/assets/airton-portrait.png)',
+          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.85) 100%), url(${asset('airton-portrait.png')})`,
           backgroundSize: 'cover', backgroundPosition: 'center 20%',
           position: 'relative',
           borderRight: '1px solid rgba(197,160,89,.12)'

@@ -5,6 +5,7 @@ import FilterBlock from './components/FilterBlock.jsx';
 import Footer from './components/Footer.jsx';
 import { CTAButton, Overline, Highlight, SectionHeader } from './components/Primitives.jsx';
 import { ProofStrip, MetricCard, PricingCard } from './components/Components.jsx';
+import { asset } from './utils.js';
 
 const proofItems = [
   { tag: 'Caso Anderson Gusmão', body: 'R$ 300 investidos → 11 visitas hiperqualificadas em 1 semana → R$ 1.000.000 em vendas fechadas.' },
@@ -40,7 +41,7 @@ export default function App() {
             </div>
           </div>
           <div style={{
-            background: 'url(/assets/brand-strategy-board.png) center/cover',
+            background: `url(${asset('brand-strategy-board.png')}) center/cover`,
             height: 440, borderRadius: 4, position: 'relative'
           }}>
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(0,0,0,.1) 40%, rgba(0,0,0,.95))', borderRadius: 4 }} />
@@ -124,7 +125,7 @@ export default function App() {
       {/* CTA */}
       <section id="cta" style={{
         padding: '140px 32px',
-        backgroundImage: 'linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,.95)), url(/assets/airton-portrait.png)',
+        backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,.95)), url(${asset('airton-portrait.png')})`,
         backgroundSize: 'cover', backgroundPosition: 'center 20%', textAlign: 'center'
       }}>
         <div style={{ maxWidth: 820, margin: '0 auto' }}>

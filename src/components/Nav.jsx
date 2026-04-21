@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CTAButton } from './Primitives.jsx';
+import { asset } from '../utils.js';
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -19,7 +20,7 @@ export default function Nav() {
       transition: 'background .2s, border-color .2s'
     }}>
       <a href="#top" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: '#fff' }}>
-        <img src="/assets/logo-sena-white-transparent.png" alt="Sena" style={{ height: 32 }} />
+        <img src={asset('logo-sena-white-transparent.png')} alt="Sena" style={{ height: 32 }} />
         <span style={{ fontFamily: '"Playfair Display",serif', fontWeight: 700, letterSpacing: '.18em', fontSize: 16 }}>SENA</span>
       </a>
       <div style={{ display: 'flex', gap: 28, fontFamily: 'Montserrat,sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,.72)' }}>

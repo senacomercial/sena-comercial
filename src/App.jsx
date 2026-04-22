@@ -4,7 +4,7 @@ import Bio from './components/Bio.jsx';
 import FilterBlock from './components/FilterBlock.jsx';
 import Footer from './components/Footer.jsx';
 import { CTAButton, Overline, Highlight, SectionHeader } from './components/Primitives.jsx';
-import { ProofStrip, MetricCard, PricingCard } from './components/Components.jsx';
+import { ProofStrip, MetricCard } from './components/Components.jsx';
 import { asset } from './utils.js';
 
 const proofItems = [
@@ -86,66 +86,29 @@ export default function App() {
         </div>
       </section>
 
-      {/* PRICING */}
-      <section id="pricing" style={{ padding: '120px 32px', background: '#0A0A0A' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <SectionHeader
-            over="MENTORIA · MODELOS DE ENTREGA"
-            title="Três formatos. Uma máquina."
-            lede="Escolha o nível de acompanhamento. Implementação é com a Sena — autogestão é com você, no fim do ciclo."
-            align="center"
-          />
-          <div style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18 }}>
-            <PricingCard
-              over="Grupo · 6 meses"
-              name="Mentoria em Grupo"
-              price="R$ 6.500"
-              pricePromo="R$ 4.950"
-              includes={['Aulas ao vivo 1x/semana', 'Área de membros + gravações', 'Biblioteca de scripts', 'Grupo VIP no WhatsApp', '6 calls individuais']}
-            />
-            <PricingCard
-              over="Estruturação Estratégica · intensivo"
-              name="Estruturação Estratégica Diagnóstica"
-              price="R$ 20.000"
-              pricePromo="R$ 18.000"
-              featured
-              includes={['Auditoria 360° da operação', 'Mapeamento do funil e dos gargalos', 'Plano de ação cravado em KPI', 'Roadmap de implantação priorizado', 'Call de devolutiva com Airton']}
-            />
-            <PricingCard
-              over="Implantação + individual"
-              name="Implantação Completa"
-              price="R$ 30.000"
-              pricePromo="R$ 27.000"
-              includes={['Diagnóstico 360° (meses 1-2)', 'Implantação total (3-4)', 'Autogestão (5-6)', 'CRM reestruturado + automações', 'Time treinado em speech e KPIs']}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
+      {/* CTA — WEBINÁRIO */}
       <section id="cta" style={{
         padding: '140px 32px',
-        backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,.95)), url(${asset('airton-portrait.png')})`,
+        backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.75), rgba(0,0,0,.96)), url(${asset('airton-portrait.png')})`,
         backgroundSize: 'cover', backgroundPosition: 'center 20%', textAlign: 'center'
       }}>
         <div style={{ maxWidth: 820, margin: '0 auto' }}>
-          <Overline variant="orange">AGENDE A SUA TELEMETRIA</Overline>
+          <Overline variant="orange">PRÓXIMO WEBINÁRIO · VAGAS LIMITADAS</Overline>
           <h2 style={{
             fontFamily: '"Playfair Display",serif', fontWeight: 800,
             fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 1.1, letterSpacing: '-.02em',
             margin: '20px 0 22px', color: '#fff'
           }}>
-            Estruture a sua máquina de vendas. <Highlight>Hoje.</Highlight>
+            Entre no grupo e garanta<br />sua vaga <Highlight color="gold">gratuitamente.</Highlight>
           </h2>
-          <p style={{ fontFamily: 'Montserrat,sans-serif', fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,.72)', margin: '0 auto 36px', maxWidth: 560 }}>
-            Vamos te dizer exatamente o que precisa ser feito — sem desperdiçar um segundo do seu tempo.
+          <p style={{ fontFamily: 'Montserrat,sans-serif', fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,.72)', margin: '0 auto 36px', maxWidth: 580 }}>
+            No webinário você vai aprender como instalar o Filtro de Intencionalidade MaVIS na sua operação e parar de perder tempo com lead inerte.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <CTAButton size="lg" icon={<span>📲</span>}>Agendar diagnóstico</CTAButton>
-            <CTAButton size="lg" variant="ghost">Ver cronograma completo</CTAButton>
-          </div>
+          <CTAButton size="lg" href="https://chat.whatsapp.com/LRwstQnyZns7HdbiDO9Ygh" icon={<span>💬</span>}>
+            Entrar no grupo do WhatsApp
+          </CTAButton>
           <p style={{ fontFamily: '"JetBrains Mono",monospace', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 28, letterSpacing: '.1em' }}>
-            SENA ACOMPANHA NO MÁXIMO 3 MENTORADOS POR CICLO
+            GRUPO GRATUITO · AVISOS DO PRÓXIMO WEBINÁRIO
           </p>
         </div>
       </section>

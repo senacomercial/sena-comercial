@@ -27,10 +27,9 @@ export default function Nav() {
         <a href="#mechanism" style={{ color: 'inherit', textDecoration: 'none' }}>Mecanismo</a>
         <a href="#method" style={{ color: 'inherit', textDecoration: 'none' }}>Método</a>
         <a href="#proof" style={{ color: 'inherit', textDecoration: 'none' }}>Casos</a>
-        <a href="#pricing" style={{ color: 'inherit', textDecoration: 'none' }}>Mentoria</a>
       </div>
-      <CTAButton size="sm" onClick={() => document.querySelector('#cta')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
-        Agendar diagnóstico
+      <CTAButton size="sm" href="https://chat.whatsapp.com/LRwstQnyZns7HdbiDO9Ygh" icon={<span>💬</span>}>
+        Entrar no grupo
       </CTAButton>
     </nav>
   );

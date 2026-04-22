@@ -1,23 +1,24 @@
-export function CTAButton({ variant = 'primary', children, onClick, icon, size = 'md' }) {
+export function CTAButton({ variant = 'primary', children, onClick, href, icon, size = 'md' }) {
   const bg = variant === 'primary' ? '#C5A059' : variant === 'ignition' ? '#E85D04' : 'transparent';
   const color = variant === 'ghost' ? '#fff' : '#000';
   const border = variant === 'ghost' ? '1px solid rgba(255,255,255,.25)' : 'none';
   const pad = size === 'lg' ? '18px 32px' : size === 'sm' ? '10px 18px' : '15px 28px';
   const fs = size === 'lg' ? 15 : size === 'sm' ? 12 : 14;
-  return (
-    <button onClick={onClick} style={{
-      display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-      fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: fs,
-      letterSpacing: '.04em', textDecoration: 'none', cursor: 'pointer',
-      border, padding: pad, borderRadius: 3, background: bg, color,
-      transition: 'filter .12s, border-color .15s'
-    }}
-      onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.12)'}
-      onMouseLeave={e => e.currentTarget.style.filter = 'none'}
-    >
-      {icon}{children}
-    </button>
-  );
+  const style = {
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+    fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: fs,
+    letterSpacing: '.04em', textDecoration: 'none', cursor: 'pointer',
+    border, padding: pad, borderRadius: 3, background: bg, color,
+    transition: 'filter .12s, border-color .15s'
+  };
+  const events = {
+    onMouseEnter: e => e.currentTarget.style.filter = 'brightness(1.12)',
+    onMouseLeave: e => e.currentTarget.style.filter = 'none',
+  };
+  if (href) {
+    return <a href={href} target="_blank" rel="noopener noreferrer" style={style} {...events}>{icon}{children}</a>;
+  }
+  return <button onClick={onClick} style={style} {...events}>{icon}{children}</button>;
 }
 
 export function Overline({ children, variant = 'gold' }) {

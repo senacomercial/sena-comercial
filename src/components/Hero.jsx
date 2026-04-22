@@ -35,8 +35,8 @@ export default function Hero() {
           Estruturamos a sua máquina de vendas com o rigor, a verdade bruta e a precisão de uma escuderia de Elite. Zero enrolação. Resultado cravado em dados.
         </p>
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-          <CTAButton size="lg" icon={<span>📲</span>} onClick={() => document.querySelector('#cta')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
-            Agende uma Análise da Operação
+          <CTAButton size="lg" href="https://chat.whatsapp.com/LRwstQnyZns7HdbiDO9Ygh" icon={<span>💬</span>}>
+            Participar do próximo webinário
           </CTAButton>
           <CTAButton size="lg" variant="ghost" onClick={() => document.querySelector('#method')?.scrollIntoView({ behavior: 'smooth' })}>
             Ver o método MaVIS

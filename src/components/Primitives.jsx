@@ -1,3 +1,5 @@
+import { trackLead } from '../analytics.js';
+
 export function CTAButton({ variant = 'primary', children, onClick, href, icon, size = 'md' }) {
   const bg = variant === 'primary' ? '#C5A059' : variant === 'ignition' ? '#E85D04' : 'transparent';
   const color = variant === 'ghost' ? '#fff' : '#000';
@@ -11,14 +13,20 @@ export function CTAButton({ variant = 'primary', children, onClick, href, icon, 
     border, padding: pad, borderRadius: 3, background: bg, color,
     transition: 'filter .12s, border-color .15s'
   };
-  const events = {
+  const hover = {
     onMouseEnter: e => e.currentTarget.style.filter = 'brightness(1.12)',
     onMouseLeave: e => e.currentTarget.style.filter = 'none',
   };
   if (href) {
-    return <a href={href} target="_blank" rel="noopener noreferrer" style={style} {...events}>{icon}{children}</a>;
+    const handleClick = href.includes('chat.whatsapp.com') ? () => trackLead() : undefined;
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer"
+        style={style} onClick={handleClick} {...hover}>
+        {icon}{children}
+      </a>
+    );
   }
-  return <button onClick={onClick} style={style} {...events}>{icon}{children}</button>;
+  return <button onClick={onClick} style={style} {...hover}>{icon}{children}</button>;
 }
 
 export function Overline({ children, variant = 'gold' }) {

@@ -2,7 +2,7 @@ export default function FilterBlock({ title = 'O Protocolo MaVIS', steps }) {
   return (
     <div style={{
       borderLeft: '3px solid #E85D04',
-      padding: '22px 26px',
+      padding: 'clamp(18px,3vw,22px) clamp(18px,3vw,26px)',
       background: 'rgba(232,93,4,.06)',
       textAlign: 'left'
     }}>

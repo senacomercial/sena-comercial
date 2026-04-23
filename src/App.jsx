@@ -27,27 +27,27 @@ export default function App() {
       <Bio />
 
       {/* MECHANISM */}
-      <section id="mechanism" style={{ padding: '120px 32px', background: '#000', borderTop: '1px solid rgba(255,255,255,.05)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 72, alignItems: 'start' }}>
+      <section id="mechanism" className="section-pad" style={{ background: '#000', borderTop: '1px solid rgba(255,255,255,.05)' }}>
+        <div className="grid-2col" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', alignItems: 'start' }}>
           <div>
             <SectionHeader
               over="MECANISMO ÚNICO · O PROBLEMA REAL"
               title={<>O corretor não tem falta de leads.<br />Tem <Highlight>excesso de Leads Inertes.</Highlight></>}
               lede="Agências são pagas para gerar o menor CPL possível. Removem as barreiras de entrada, atraem curiosos sem crédito e sem intenção — e o seu WhatsApp vira depósito de vácuo."
             />
-            <div style={{ marginTop: 36, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div className="grid-metric-2" style={{ marginTop: 32, display: 'grid' }}>
               <MetricCard over="CPL sem filtro" num="R$ 14" sub="curioso entra a custo baixo" />
               <MetricCard over="horas/dia perdidas" num="4h+" sub="respondendo lead inerte" />
             </div>
           </div>
-          <div style={{
+          <div className="mech-panel" style={{
             background: `url(${asset('brand-strategy-board.png')}) center/cover`,
-            height: 440, borderRadius: 4, position: 'relative'
+            borderRadius: 4, position: 'relative'
           }}>
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(0,0,0,.1) 40%, rgba(0,0,0,.95))', borderRadius: 4 }} />
             <div style={{ position: 'absolute', bottom: 24, left: 24, right: 24 }}>
               <Overline variant="orange">TELEMETRIA</Overline>
-              <div style={{ fontFamily: '"Playfair Display",serif', fontStyle: 'italic', fontWeight: 700, fontSize: 24, lineHeight: 1.3, color: '#fff', marginTop: 10 }}>
+              <div style={{ fontFamily: '"Playfair Display",serif', fontStyle: 'italic', fontWeight: 700, fontSize: 'clamp(18px,2.5vw,24px)', lineHeight: 1.3, color: '#fff', marginTop: 10 }}>
                 "Agência comemora o CPL baixo. O corretor perde o dia em vácuo."
               </div>
             </div>
@@ -56,7 +56,7 @@ export default function App() {
       </section>
 
       {/* METHOD */}
-      <section id="method" style={{ padding: '120px 32px', background: 'linear-gradient(180deg,#000,#0A0A0A)' }}>
+      <section id="method" className="section-pad" style={{ background: 'linear-gradient(180deg,#000,#0A0A0A)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <SectionHeader
             over="A SOLUÇÃO · MÁQUINA DE VENDAS IMOBILIÁRIAS DA SENA"
@@ -64,20 +64,20 @@ export default function App() {
             lede="Três pilares. Plug-and-play. O WhatsApp do corretor só é desbloqueado para quem passa pelo filtro."
             align="center"
           />
-          <div style={{ maxWidth: 720, margin: '56px auto 0' }}>
+          <div style={{ maxWidth: 720, margin: '40px auto 0' }}>
             <FilterBlock title="O Protocolo MaVIS" steps={mavisSteps} />
           </div>
         </div>
       </section>
 
       {/* PROOF */}
-      <section id="proof" style={{ padding: '120px 32px', background: '#000' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 72, alignItems: 'center' }}>
+      <section id="proof" className="section-pad" style={{ background: '#000' }}>
+        <div className="grid-2col" style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', alignItems: 'center' }}>
           <div>
             <SectionHeader over="PROVAS · DA PISTA" title={<>Resultado cravado em dados.<br />Não em vaidade.</>} />
-            <div style={{ marginTop: 36 }}><ProofStrip items={proofItems} /></div>
+            <div style={{ marginTop: 32 }}><ProofStrip items={proofItems} /></div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div className="proof-metrics" style={{ display: 'grid' }}>
             <MetricCard over="Vendas · 1 semana" num="R$ 1.0M" sub="com R$ 300 investidos" variant="gold" />
             <MetricCard over="Conversão" num="5×" sub="vs lead inerte" variant="gold" />
             <MetricCard over="Visitas qualificadas" num="11" sub="em 7 dias · Gusmão" />
@@ -87,8 +87,7 @@ export default function App() {
       </section>
 
       {/* CTA — WEBINÁRIO */}
-      <section id="cta" style={{
-        padding: '140px 32px',
+      <section id="cta" className="cta-section" style={{
         backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.75), rgba(0,0,0,.96)), url(${asset('airton-portrait.png')})`,
         backgroundSize: 'cover', backgroundPosition: 'center 20%', textAlign: 'center'
       }}>
@@ -96,12 +95,12 @@ export default function App() {
           <Overline variant="orange">PRÓXIMO WEBINÁRIO · VAGAS LIMITADAS</Overline>
           <h2 style={{
             fontFamily: '"Playfair Display",serif', fontWeight: 800,
-            fontSize: 'clamp(36px, 5vw, 64px)', lineHeight: 1.1, letterSpacing: '-.02em',
+            fontSize: 'clamp(30px, 6vw, 64px)', lineHeight: 1.1, letterSpacing: '-.02em',
             margin: '20px 0 22px', color: '#fff'
           }}>
-            Entre no grupo e garanta<br />sua vaga <Highlight color="gold">gratuitamente.</Highlight>
+            Entre no grupo e garanta sua vaga <Highlight color="gold">gratuitamente.</Highlight>
           </h2>
-          <p style={{ fontFamily: 'Montserrat,sans-serif', fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,.72)', margin: '0 auto 36px', maxWidth: 580 }}>
+          <p style={{ fontFamily: 'Montserrat,sans-serif', fontSize: 'clamp(15px,2vw,17px)', lineHeight: 1.6, color: 'rgba(255,255,255,.72)', margin: '0 auto 32px', maxWidth: 580 }}>
             No webinário você vai aprender como instalar o Filtro de Intencionalidade MaVIS na sua operação e parar de perder tempo com lead inerte.
           </p>
           <CTAButton size="lg" href="https://chat.whatsapp.com/LRwstQnyZns7HdbiDO9Ygh" icon={<span>💬</span>}>

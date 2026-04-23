@@ -12,19 +12,19 @@ const numbers = [
 export default function Bio() {
   return (
     <section id="airton" style={{ background: '#000', borderTop: '1px solid rgba(255,255,255,.05)' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,520px) 1fr', minHeight: 720 }}>
+      <div className="bio-grid">
         {/* LEFT — full-bleed portrait */}
-        <div style={{
+        <div className="bio-photo" style={{
           backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.85) 100%), url(${asset('airton-portrait.png')})`,
           backgroundSize: 'cover', backgroundPosition: 'center 20%',
           position: 'relative',
           borderRight: '1px solid rgba(197,160,89,.12)'
         }}>
-          <div style={{ position: 'absolute', bottom: 36, left: 36, right: 36 }}>
+          <div style={{ position: 'absolute', bottom: 'clamp(24px,5vw,36px)', left: 'clamp(20px,5vw,36px)', right: 'clamp(20px,5vw,36px)' }}>
             <Overline variant="gold">PILOTO · FUNDADOR</Overline>
-            <div style={{
+            <div className="bio-name" style={{
               fontFamily: '"Playfair Display",serif', fontWeight: 800,
-              fontSize: 54, lineHeight: .95, letterSpacing: '-.02em',
+              lineHeight: .95, letterSpacing: '-.02em',
               color: '#fff', marginTop: 10
             }}>Airton<br />Carneiro</div>
             <div style={{
@@ -36,38 +36,38 @@ export default function Bio() {
         </div>
 
         {/* RIGHT — editorial */}
-        <div style={{ padding: '100px 72px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div className="bio-content" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <Overline variant="orange">QUEM PILOTA A ESCUDERIA</Overline>
           <h2 style={{
             fontFamily: '"Playfair Display",serif', fontWeight: 800,
-            fontSize: 'clamp(32px, 4vw, 56px)', lineHeight: 1.05, letterSpacing: '-.02em',
+            fontSize: 'clamp(28px, 5vw, 56px)', lineHeight: 1.05, letterSpacing: '-.02em',
             margin: '16px 0 20px', color: '#fff', maxWidth: 640
           }}>
             Chamado de <Highlight color="gold">o Sena das vendas imobiliárias</Highlight> pelo método que acelera cada fechamento.
           </h2>
           <p style={{
-            fontFamily: 'Montserrat,sans-serif', fontSize: 17, lineHeight: 1.7,
+            fontFamily: 'Montserrat,sans-serif', fontSize: 'clamp(15px,2vw,17px)', lineHeight: 1.7,
             color: 'rgba(255,255,255,.78)', margin: 0, maxWidth: 620
           }}>
             Quase <strong style={{ color: '#fff' }}>15 anos no mercado imobiliário</strong> como corretor, gestor e consultor. Construiu uma metodologia própria — a MaVIS — que reduz o ciclo de fechamento, filtra lead inerte na origem e transforma operações dispersas em máquina auditável.
           </p>
           <p style={{
-            fontFamily: 'Montserrat,sans-serif', fontSize: 17, lineHeight: 1.7,
+            fontFamily: 'Montserrat,sans-serif', fontSize: 'clamp(15px,2vw,17px)', lineHeight: 1.7,
             color: 'rgba(255,255,255,.78)', margin: '16px 0 0', maxWidth: 620
           }}>
             Hoje a Sena acompanha, por ciclo, um máximo de três mentorados — padrão paddock, não sala de aula.
           </p>
 
           {/* numbers grid */}
-          <div style={{
-            marginTop: 56, paddingTop: 32, borderTop: '1px solid rgba(255,255,255,.08)',
-            display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 24, maxWidth: 860
+          <div className="bio-numbers" style={{
+            marginTop: 48, paddingTop: 32, borderTop: '1px solid rgba(255,255,255,.08)',
+            display: 'grid', maxWidth: 860
           }}>
             {numbers.map((it, i) => (
               <div key={i}>
                 <div style={{
                   fontFamily: '"JetBrains Mono",monospace', fontWeight: 700,
-                  fontSize: it.n.length > 5 ? 24 : 30, letterSpacing: '-.02em',
+                  fontSize: `clamp(22px, 3vw, ${it.n.length > 5 ? 24 : 30}px)`, letterSpacing: '-.02em',
                   color: '#C5A059', lineHeight: 1
                 }}>{it.n}</div>
                 <div style={{

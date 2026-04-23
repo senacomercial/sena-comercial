@@ -22,10 +22,10 @@ export function MetricCard({ over, num, sub, variant = 'orange' }) {
   return (
     <div style={{
       background: '#0A0A0A', border: '1px solid rgba(255,255,255,.08)',
-      borderRadius: 6, padding: '22px 24px', position: 'relative'
+      borderRadius: 6, padding: 'clamp(16px,3vw,22px) clamp(18px,3vw,24px)', position: 'relative'
     }}>
       <div style={{ fontFamily: 'Montserrat,sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#C5A059' }}>{over}</div>
-      <div style={{ fontFamily: '"JetBrains Mono",monospace', fontWeight: 700, fontSize: 40, color, margin: '8px 0 4px', fontVariantNumeric: 'tabular-nums', letterSpacing: '-.02em' }}>{num}</div>
+      <div className="mcard-num" style={{ fontFamily: '"JetBrains Mono",monospace', fontWeight: 700, color, margin: '8px 0 4px', fontVariantNumeric: 'tabular-nums', letterSpacing: '-.02em', overflowWrap: 'break-word' }}>{num}</div>
       <div style={{ fontFamily: 'Montserrat,sans-serif', fontSize: 12, color: 'rgba(255,255,255,.55)', lineHeight: 1.4 }}>{sub}</div>
     </div>
   );

@@ -1,0 +1,138 @@
+/* ============ RESET / BASE (mobile-first) ============ */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { -webkit-text-size-adjust: 100%; }
+img, video { max-width: 100%; height: auto; display: block; }
+a { -webkit-tap-highlight-color: transparent; }
+button, a { touch-action: manipulation; }
+
+/* Tipografia fluida usando clamp() */
+:root {
+  --pad-x: clamp(20px, 5vw, 32px);
+  --pad-section: clamp(64px, 10vw, 120px);
+}
+
+/* ============ NAV ============ */
+.nav-wrap {
+  padding: 14px var(--pad-x);
+}
+.nav-links {
+  display: none;
+}
+@media (min-width: 768px) {
+  .nav-links { display: flex; }
+}
+
+/* ============ HERO ============ */
+.hero-section {
+  padding: 80px var(--pad-x) 64px !important;
+  min-height: 78vh !important;
+}
+.hero-stats {
+  gap: 24px !important;
+}
+@media (min-width: 768px) {
+  .hero-section { min-height: 86vh !important; padding: 100px var(--pad-x) !important; }
+  .hero-stats { gap: 40px !important; }
+}
+
+/* ============ BIO (Airton) ============ */
+.bio-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: auto !important;
+}
+.bio-photo {
+  min-height: 420px;
+  background-position: center 15% !important;
+}
+.bio-content {
+  padding: 56px var(--pad-x) !important;
+}
+.bio-name {
+  font-size: clamp(36px, 7vw, 54px) !important;
+}
+.bio-numbers {
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 20px !important;
+}
+@media (min-width: 768px) {
+  .bio-photo { min-height: 520px; }
+  .bio-numbers { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (min-width: 1024px) {
+  .bio-grid { grid-template-columns: minmax(0, 520px) 1fr; min-height: 720px !important; }
+  .bio-content { padding: 100px 72px !important; }
+  .bio-numbers { grid-template-columns: repeat(5, 1fr) !important; gap: 24px !important; }
+  .bio-photo { min-height: auto; }
+}
+
+/* ============ GRID HELPERS (generic two-column sections) ============ */
+.section-pad {
+  padding: var(--pad-section) var(--pad-x) !important;
+}
+.grid-2col {
+  grid-template-columns: 1fr !important;
+  gap: 48px !important;
+}
+.grid-3col {
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+}
+.grid-metric-2 {
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px !important;
+}
+@media (min-width: 768px) {
+  .grid-3col { grid-template-columns: repeat(3, 1fr) !important; gap: 18px !important; }
+}
+@media (min-width: 1024px) {
+  .grid-2col { grid-template-columns: 1fr 1.1fr !important; gap: 72px !important; }
+}
+
+/* ============ MECHANISM quote panel ============ */
+.mech-panel {
+  height: 320px !important;
+}
+@media (min-width: 1024px) {
+  .mech-panel { height: 440px !important; }
+}
+
+/* ============ PROOF grid of 4 metrics ============ */
+.proof-metrics {
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px !important;
+}
+
+/* ============ CTA ============ */
+.cta-section {
+  padding: 90px var(--pad-x) !important;
+}
+@media (min-width: 768px) {
+  .cta-section { padding: 140px var(--pad-x) !important; }
+}
+
+/* ============ FOOTER ============ */
+.footer-grid {
+  grid-template-columns: 1fr 1fr !important;
+  gap: 32px !important;
+}
+.footer-brand { grid-column: 1 / -1; }
+.footer-bottom {
+  flex-direction: column !important;
+  gap: 10px !important;
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .footer-grid { grid-template-columns: 1.4fr 1fr 1fr 1fr !important; gap: 40px !important; }
+  .footer-brand { grid-column: auto; }
+  .footer-bottom { flex-direction: row !important; text-align: left; }
+}
+
+/* ============ METRIC CARD ============ */
+.mcard-num {
+  font-size: clamp(28px, 6vw, 40px) !important;
+}
+
+/* ============ SECTION HEADERS ============ */
+h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; word-break: break-word; }

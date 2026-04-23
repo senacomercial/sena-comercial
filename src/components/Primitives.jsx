@@ -54,11 +54,11 @@ export function SectionHeader({ over, title, lede, align = 'left' }) {
       {over && <Overline>{over}</Overline>}
       <h2 style={{
         fontFamily: '"Playfair Display", serif', fontWeight: 700,
-        fontSize: 'clamp(32px, 4vw, 52px)', lineHeight: 1.1, letterSpacing: '-.02em',
+        fontSize: 'clamp(26px, 5vw, 52px)', lineHeight: 1.1, letterSpacing: '-.02em',
         margin: '14px 0 14px', color: '#fff'
       }}>{title}</h2>
       {lede && <p style={{
-        fontFamily: 'Montserrat, sans-serif', fontSize: 17, lineHeight: 1.6,
+        fontFamily: 'Montserrat, sans-serif', fontSize: 'clamp(15px,2vw,17px)', lineHeight: 1.6,
         color: 'rgba(255,255,255,.7)', margin: 0, maxWidth: 640
       }}>{lede}</p>}
     </div>

@@ -12,11 +12,11 @@ function MiniStat({ num, label }) {
 
 export default function Hero() {
   return (
-    <section id="top" style={{
-      position: 'relative', minHeight: '86vh',
+    <section id="top" className="hero-section" style={{
+      position: 'relative',
       backgroundImage: `linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.95) 100%), url(${asset('brand-racing-suit-gold.png')})`,
       backgroundSize: 'cover', backgroundPosition: 'center',
-      display: 'flex', alignItems: 'center', padding: '80px 32px'
+      display: 'flex', alignItems: 'center'
     }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <Overline variant="orange">ESCUDERIA DE ESTRUTURAÇÃO COMERCIAL · IMOBILIÁRIAS & PMEs</Overline>
@@ -42,7 +42,7 @@ export default function Hero() {
             Ver o método MaVIS
           </CTAButton>
         </div>
-        <div style={{ display: 'flex', gap: 40, marginTop: 64, paddingTop: 28, borderTop: '1px solid rgba(255,255,255,.1)', flexWrap: 'wrap' }}>
+        <div className="hero-stats" style={{ display: 'flex', marginTop: 48, paddingTop: 28, borderTop: '1px solid rgba(255,255,255,.1)', flexWrap: 'wrap' }}>
           <MiniStat num="R$ 1.0M" label="fechados com R$ 300" />
           <MiniStat num="5×" label="conversão pós-filtro" />
           <MiniStat num="4h/dia" label="devolvidas ao corretor" />

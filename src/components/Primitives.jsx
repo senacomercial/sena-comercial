@@ -18,7 +18,8 @@ export function CTAButton({ variant = 'primary', children, onClick, href, icon, 
     onMouseLeave: e => e.currentTarget.style.filter = 'none',
   };
   if (href) {
-    const handleClick = href.includes('chat.whatsapp.com') ? () => trackLead() : undefined;
+    const isWhatsApp = href.includes('wa.me') || href.includes('chat.whatsapp.com');
+    const handleClick = isWhatsApp ? () => trackLead() : undefined;
     return (
       <a href={href} target="_blank" rel="noopener noreferrer"
         style={style} onClick={handleClick} {...hover}>

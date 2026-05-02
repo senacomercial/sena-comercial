@@ -35,7 +35,7 @@ export default function Hero() {
           Estruturamos a sua máquina de vendas com o rigor, a verdade bruta e a precisão de uma escuderia de Elite. Zero enrolação. Resultado cravado em dados.
         </p>
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-          <CTAButton size="lg" href="https://chat.whatsapp.com/LRwstQnyZns7HdbiDO9Ygh" icon={<span>💬</span>}>
+          <CTAButton size="lg" href="https://wa.me/553131578482" icon={<span>💬</span>}>
             Participar do próximo webinário
           </CTAButton>
           <CTAButton size="lg" variant="ghost" onClick={() => document.querySelector('#method')?.scrollIntoView({ behavior: 'smooth' })}>

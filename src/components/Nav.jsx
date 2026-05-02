@@ -29,8 +29,8 @@ export default function Nav() {
         <a href="#method" style={{ color: 'inherit', textDecoration: 'none' }}>Método</a>
         <a href="#proof" style={{ color: 'inherit', textDecoration: 'none' }}>Casos</a>
       </div>
-      <CTAButton size="sm" href="https://chat.whatsapp.com/LRwstQnyZns7HdbiDO9Ygh" icon={<span>💬</span>}>
-        Entrar no grupo
+      <CTAButton size="sm" href="https://wa.me/553131578482" icon={<span>💬</span>}>
+        Falar no WhatsApp
       </CTAButton>
     </nav>
   );

@@ -117,7 +117,7 @@ export default function App() {
               <div style={{
                 fontFamily: '"JetBrains Mono",monospace', fontSize: 'clamp(22px,3vw,28px)',
                 fontWeight: 700, color: '#fff', letterSpacing: '-.01em', marginTop: 2
-              }}>07 · JUN · 19:00</div>
+              }}>07 · MAI · 19:00</div>
             </div>
           </div>
 

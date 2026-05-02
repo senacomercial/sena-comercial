@@ -51,7 +51,7 @@ export default function Hero() {
           <span style={{
             fontFamily: '"JetBrains Mono",monospace', fontSize: 'clamp(13px,1.6vw,15px)',
             fontWeight: 700, color: '#fff', letterSpacing: '.04em'
-          }}>QUI · 07/06 · 19:00</span>
+          }}>QUI · 07/05 · 19:00</span>
         </div>
 
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>

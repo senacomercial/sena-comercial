@@ -98,8 +98,29 @@ export default function App() {
             fontSize: 'clamp(30px, 6vw, 64px)', lineHeight: 1.1, letterSpacing: '-.02em',
             margin: '20px 0 22px', color: '#fff'
           }}>
-            Entre no grupo e garanta sua vaga <Highlight color="gold">gratuitamente.</Highlight>
+            Garanta sua vaga no <Highlight color="gold">próximo webinário gratuito.</Highlight>
           </h2>
+
+          {/* Cartão da data */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 18, flexWrap: 'wrap', justifyContent: 'center',
+            padding: '18px 28px', margin: '0 auto 32px',
+            background: 'rgba(232,93,4,.1)',
+            border: '1px solid rgba(232,93,4,.5)',
+            borderRadius: 6
+          }}>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{
+                fontFamily: 'Montserrat,sans-serif', fontSize: 10, fontWeight: 800,
+                letterSpacing: '.2em', textTransform: 'uppercase', color: '#E85D04'
+              }}>QUINTA-FEIRA</div>
+              <div style={{
+                fontFamily: '"JetBrains Mono",monospace', fontSize: 'clamp(22px,3vw,28px)',
+                fontWeight: 700, color: '#fff', letterSpacing: '-.01em', marginTop: 2
+              }}>07 · JUN · 19:00</div>
+            </div>
+          </div>
+
           <p style={{ fontFamily: 'Montserrat,sans-serif', fontSize: 'clamp(15px,2vw,17px)', lineHeight: 1.6, color: 'rgba(255,255,255,.72)', margin: '0 auto 32px', maxWidth: 580 }}>
             No webinário você vai aprender como instalar o Filtro de Intencionalidade MaVIS na sua operação e parar de perder tempo com lead inerte.
           </p>

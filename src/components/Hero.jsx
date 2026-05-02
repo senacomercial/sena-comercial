@@ -30,10 +30,30 @@ export default function Hero() {
         </h1>
         <p style={{
           fontFamily: 'Montserrat,sans-serif', fontSize: 18, lineHeight: 1.6,
-          color: 'rgba(255,255,255,.78)', margin: '0 0 36px', maxWidth: 620
+          color: 'rgba(255,255,255,.78)', margin: '0 0 28px', maxWidth: 620
         }}>
           Estruturamos a sua máquina de vendas com o rigor, a verdade bruta e a precisão de uma escuderia de Elite. Zero enrolação. Resultado cravado em dados.
         </p>
+
+        {/* Banner do webinário */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+          padding: '14px 22px', marginBottom: 28,
+          background: 'rgba(232,93,4,.12)',
+          border: '1px solid rgba(232,93,4,.55)',
+          borderLeft: '4px solid #E85D04',
+          borderRadius: 4
+        }}>
+          <span style={{
+            fontFamily: 'Montserrat,sans-serif', fontSize: 11, fontWeight: 800,
+            letterSpacing: '.18em', textTransform: 'uppercase', color: '#E85D04'
+          }}>🔴 Webinário ao vivo</span>
+          <span style={{
+            fontFamily: '"JetBrains Mono",monospace', fontSize: 'clamp(13px,1.6vw,15px)',
+            fontWeight: 700, color: '#fff', letterSpacing: '.04em'
+          }}>QUI · 07/06 · 19:00</span>
+        </div>
+
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
           <CTAButton size="lg" href="https://wa.me/553131578482" icon={<span>💬</span>}>
             Participar do próximo webinário

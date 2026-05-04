@@ -124,7 +124,7 @@ export default function App() {
           <p style={{ fontFamily: 'Montserrat,sans-serif', fontSize: 'clamp(15px,2vw,17px)', lineHeight: 1.6, color: 'rgba(255,255,255,.72)', margin: '0 auto 32px', maxWidth: 580 }}>
             No webinário você vai aprender como instalar o Filtro de Intencionalidade MaVIS na sua operação e parar de perder tempo com lead inerte.
           </p>
-          <CTAButton size="lg" href="https://wa.me/553131578482" icon={<span>💬</span>}>
+          <CTAButton size="lg" href="https://wa.me/553299526417" icon={<span>💬</span>}>
             Falar no WhatsApp agora
           </CTAButton>
           <p style={{ fontFamily: '"JetBrains Mono",monospace', fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 28, letterSpacing: '.1em' }}>

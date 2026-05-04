@@ -55,7 +55,7 @@ export default function Hero() {
         </div>
 
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-          <CTAButton size="lg" href="https://wa.me/553131578482" icon={<span>💬</span>}>
+          <CTAButton size="lg" href="https://wa.me/553299526417" icon={<span>💬</span>}>
             Participar do próximo webinário
           </CTAButton>
           <CTAButton size="lg" variant="ghost" onClick={() => document.querySelector('#method')?.scrollIntoView({ behavior: 'smooth' })}>

@@ -4,11 +4,13 @@ import { brl, dateBR, today, daysUntil } from '../../lib/format'
 import {
   Button, Card, Modal, Input, Select, Badge, PageHeader, EmptyState,
 } from '../../components/ui'
+import Categorias from './Categorias'
 
 const TABS = [
   { id: 'lancamentos', label: 'Lançamentos' },
   { id: 'contas', label: 'Contas a pagar/receber' },
   { id: 'dividas', label: 'Dívidas' },
+  { id: 'categorias', label: 'Categorias' },
 ]
 
 export default function Financeiro() {
@@ -37,6 +39,7 @@ export default function Financeiro() {
       {tab === 'lancamentos' && <Lancamentos />}
       {tab === 'contas' && <Contas />}
       {tab === 'dividas' && <Dividas />}
+      {tab === 'categorias' && <Categorias />}
     </div>
   )
 }
@@ -44,6 +47,7 @@ export default function Financeiro() {
 /* ---------------- Lançamentos (transações) ---------------- */
 function Lancamentos() {
   const { rows, create, update, remove, isLoading } = useCollection('transactions', { order: 'date' })
+  const { rows: categories } = useCollection('categories', { order: 'name', ascending: true })
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(null)
 
@@ -56,19 +60,50 @@ function Lancamentos() {
     return { income, expense, balance: income - expense }
   }, [rows])
 
-  const blank = { description: '', amount: '', type: 'income', date: today(), category: '', status: 'pago' }
+  const blank = { description: '', amount: '', type: 'income', date: today(), category: '', category_id: '', subcategory_id: '', status: 'pago' }
   const [form, setForm] = useState(blank)
+
+  // Categorias-pai filtradas pelo tipo selecionado.
+  const parentCats = useMemo(
+    () => categories.filter((c) => !c.parent_id && c.type === form.type),
+    [categories, form.type]
+  )
+  // Subcategorias da categoria-pai escolhida.
+  const subCats = useMemo(
+    () => categories.filter((c) => c.parent_id === form.category_id),
+    [categories, form.category_id]
+  )
 
   const openNew = () => { setEditing(null); setForm(blank); setOpen(true) }
   const openEdit = (r) => {
     setEditing(r)
-    setForm({ description: r.description, amount: r.amount, type: r.type, date: r.date, category: r.category || '', status: r.status })
+    // Reconstrói a seleção de categoria/subcategoria a partir do category_id salvo.
+    const cat = categories.find((c) => c.id === r.category_id)
+    let category_id = '', subcategory_id = ''
+    if (cat) {
+      if (cat.parent_id) { category_id = cat.parent_id; subcategory_id = cat.id }
+      else { category_id = cat.id }
+    }
+    setForm({ description: r.description, amount: r.amount, type: r.type, date: r.date, category: r.category || '', category_id, subcategory_id, status: r.status })
     setOpen(true)
   }
 
   const save = async (e) => {
     e.preventDefault()
-    const payload = { ...form, amount: Number(form.amount) }
+    // category_id final = subcategoria se escolhida, senão a categoria-pai.
+    const finalCatId = form.subcategory_id || form.category_id || null
+    const parentName = categories.find((c) => c.id === form.category_id)?.name || ''
+    const subName = categories.find((c) => c.id === form.subcategory_id)?.name
+    const categoryText = subName ? `${parentName} › ${subName}` : parentName
+    const payload = {
+      description: form.description,
+      amount: Number(form.amount),
+      type: form.type,
+      date: form.date,
+      status: form.status,
+      category_id: finalCatId,
+      category: categoryText, // texto usado nos gráficos do dashboard
+    }
     if (editing) await update.mutateAsync({ id: editing.id, ...payload })
     else await create.mutateAsync(payload)
     setOpen(false)
@@ -133,17 +168,35 @@ function Lancamentos() {
             <Input label="Valor (R$)" type="number" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
             <Input label="Data" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <Select label="Tipo" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+          <div className="grid grid-cols-2 gap-3">
+            <Select label="Tipo" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value, category_id: '', subcategory_id: '' })}>
               <option value="income">Receita</option>
               <option value="expense">Despesa</option>
             </Select>
-            <Input label="Categoria" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
             <Select label="Status" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
               <option value="pago">Pago</option>
               <option value="previsto">Previsto</option>
             </Select>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Select label="Categoria" value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value, subcategory_id: '' })}>
+              <option value="">— Sem categoria —</option>
+              {parentCats.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </Select>
+            <Select label="Subcategoria" value={form.subcategory_id} onChange={(e) => setForm({ ...form, subcategory_id: e.target.value })} disabled={subCats.length === 0}>
+              <option value="">{subCats.length === 0 ? '— (sem subcategorias) —' : '— Nenhuma —'}</option>
+              {subCats.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </Select>
+          </div>
+          {parentCats.length === 0 && (
+            <p className="text-xs text-neutral-400">
+              Nenhuma categoria de {form.type === 'income' ? 'receita' : 'despesa'} criada ainda. Crie na aba <strong>Categorias</strong>.
+            </p>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
             <Button type="submit">Salvar</Button>

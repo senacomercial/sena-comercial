@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
+  PieChart, Pie, Cell, LineChart, Line
 } from 'recharts'
 import { useCollection } from '../../lib/useCollection'
 import { brl, daysUntil } from '../../lib/format'
@@ -38,6 +39,33 @@ export default function Dashboard() {
     [tasks.rows]
   )
 
+  const tarefasAtrasadas = useMemo(
+    () => tasks.rows.filter((t) => t.status !== 'feito' && t.due_date && daysUntil(t.due_date) < 0),
+    [tasks.rows]
+  )
+
+  const contasAtrasadas = useMemo(
+    () => bills.rows.filter((b) => b.status !== 'pago' && daysUntil(b.due_date) < 0),
+    [bills.rows]
+  )
+
+  // Despesas por categoria
+  const categoryBreakdown = useMemo(() => {
+    const cats = {}
+    for (const t of tx.rows) {
+      if (t.type === 'expense' && t.category) {
+        if (!cats[t.category]) cats[t.category] = 0
+        cats[t.category] += Number(t.amount || 0)
+      }
+    }
+    return Object.entries(cats)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 6)
+  }, [tx.rows])
+
+  const COLORS = ['#b8893a', '#d4493f', '#1f9d61', '#d99a16', '#6366f1', '#f59e0b']
+
   // Receita x Despesa por mês (últimos 6 meses).
   const chartData = useMemo(() => {
     const map = {}
@@ -62,23 +90,26 @@ export default function Dashboard() {
     <div>
       <PageHeader title="Dashboard" subtitle="Visão geral da SENA COMERCIAL" />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <Kpi to="/financeiro" label="Saldo" value={brl(fin.balance)} color={fin.balance >= 0 ? 'text-success' : 'text-danger'} />
-        <Kpi to="/financeiro" label="Contas a pagar" value={brl(aPagar)} color="text-danger" />
-        <Kpi to="/crm" label="Pipeline em aberto" value={brl(pipeline)} color="text-brand-dark" />
-        <Kpi to="/tarefas" label="Tarefas vencendo" value={String(tarefasVencendo.length)} />
+        <Kpi to="/financeiro" label="Receitas" value={brl(fin.income)} color="text-success" />
+        <Kpi to="/financeiro" label="Despesas" value={brl(fin.expense)} color="text-danger" />
+        <Kpi to="/crm" label="Pipeline" value={brl(pipeline)} color="text-brand-dark" />
+        <Kpi to="/tarefas" label="Atrasadas" value={String(tarefasAtrasadas.length)} color={tarefasAtrasadas.length > 0 ? 'text-danger' : ''} />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <div className="mb-4 font-medium">Receita × Despesa (6 meses)</div>
-          <div className="h-64">
+        {/* Fluxo de caixa */}
+        <Card className="lg:col-span-2 p-0">
+          <div className="px-4 py-3 border-b border-neutral-200 font-medium">Receita × Despesa (6 meses)</div>
+          <div className="h-72 p-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                 <XAxis dataKey="mes" fontSize={12} />
                 <YAxis fontSize={12} tickFormatter={(v) => `${v / 1000}k`} />
                 <Tooltip formatter={(v) => brl(v)} />
+                <Legend />
                 <Bar dataKey="Receita" fill="#1f9d61" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="Despesa" fill="#d4493f" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -86,6 +117,7 @@ export default function Dashboard() {
           </div>
         </Card>
 
+        {/* Próximas tarefas */}
         <Card>
           <div className="mb-3 font-medium">Próximas tarefas</div>
           {tarefasVencendo.length === 0 ? (
@@ -105,6 +137,73 @@ export default function Dashboard() {
           )}
         </Card>
       </div>
+
+      {/* Despesas por categoria */}
+      {categoryBreakdown.length > 0 && (
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <Card className="lg:col-span-2 p-0">
+            <div className="px-4 py-3 border-b border-neutral-200 font-medium">Despesas por categoria</div>
+            <div className="h-72 p-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryBreakdown}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${brl(value)}`}
+                    outerRadius={110}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {categoryBreakdown.map((_, idx) => (
+                      <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v) => brl(v)} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          {/* Alertas */}
+          <div className="space-y-3">
+            {tarefasAtrasadas.length > 0 && (
+              <Card className="border-l-4 border-danger bg-danger/5">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">⏰</span>
+                  <div>
+                    <p className="text-xs text-neutral-600">Tarefas atrasadas</p>
+                    <p className="text-xl font-semibold text-danger">{tarefasAtrasadas.length}</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+            {contasAtrasadas.length > 0 && (
+              <Card className="border-l-4 border-warning bg-warning/10">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <p className="text-xs text-neutral-600">Contas vencidas</p>
+                    <p className="text-xl font-semibold text-warning">{brl(contasAtrasadas.reduce((s, b) => s + Number(b.amount), 0))}</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+            {leads.rows.filter((l) => l.stage === 'negociacao').length > 0 && (
+              <Card className="border-l-4 border-brand bg-brand/5">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🔥</span>
+                  <div>
+                    <p className="text-xs text-neutral-600">Em negociação</p>
+                    <p className="text-xl font-semibold text-brand-dark">{leads.rows.filter((l) => l.stage === 'negociacao').length}</p>
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="mt-6">
         <Card>

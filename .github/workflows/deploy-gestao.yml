@@ -35,7 +35,7 @@ jobs:
         uses: nwtgck/actions-netlify@v3.0
         with:
           publish-dir: './gestao/dist'
-          production-branch: main
+          production-deploy: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: 'Deploy automático: ${{ github.event.head_commit.message }}'
           enable-pull-request-comment: true

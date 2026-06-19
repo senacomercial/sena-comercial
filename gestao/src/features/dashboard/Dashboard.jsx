@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
@@ -86,6 +86,80 @@ export default function Dashboard() {
     return Object.values(map)
   }, [tx.rows])
 
+  // ---- Fluxo de caixa diário acumulado (com seletor de período) ----
+  const [period, setPeriod] = useState('p30')
+  const PERIODS = [
+    { id: 'semana', label: 'Semana' },
+    { id: 'mes', label: 'Mês' },
+    { id: 'p30', label: 'Próx. 30 dias' },
+    { id: 'p90', label: 'Próx. 3 meses' },
+    { id: 'p180', label: 'Próx. 6 meses' },
+  ]
+
+  const range = useMemo(() => {
+    const now = new Date()
+    now.setHours(0, 0, 0, 0)
+    const iso = (d) => d.toISOString().slice(0, 10)
+    let start, end
+    if (period === 'semana') {
+      start = new Date(now); start.setDate(now.getDate() - 6)
+      end = now
+    } else if (period === 'mes') {
+      start = new Date(now.getFullYear(), now.getMonth(), 1)
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    } else {
+      const days = period === 'p30' ? 30 : period === 'p90' ? 90 : 180
+      start = now
+      end = new Date(now); end.setDate(now.getDate() + days)
+    }
+    return { start: iso(start), end: iso(end) }
+  }, [period])
+
+  // Série diária acumulada: transações realizadas + contas (bills) em aberto projetadas.
+  const dailyFlow = useMemo(() => {
+    const { start, end } = range
+    const iso = (d) => d.toISOString().slice(0, 10)
+
+    // Saldo inicial = transações antes do início + contas vencidas em aberto antes do início.
+    let baseline = 0
+    for (const t of tx.rows) {
+      if (t.date < start) baseline += t.type === 'income' ? Number(t.amount) : -Number(t.amount)
+    }
+    for (const b of bills.rows) {
+      if (b.status !== 'pago' && b.due_date < start) {
+        baseline += b.kind === 'receber' ? Number(b.amount) : -Number(b.amount)
+      }
+    }
+
+    // Net por dia dentro do período.
+    const netByDay = {}
+    for (const t of tx.rows) {
+      if (t.date >= start && t.date <= end) {
+        netByDay[t.date] = (netByDay[t.date] || 0) + (t.type === 'income' ? Number(t.amount) : -Number(t.amount))
+      }
+    }
+    for (const b of bills.rows) {
+      if (b.status !== 'pago' && b.due_date >= start && b.due_date <= end) {
+        netByDay[b.due_date] = (netByDay[b.due_date] || 0) + (b.kind === 'receber' ? Number(b.amount) : -Number(b.amount))
+      }
+    }
+
+    const out = []
+    let acc = baseline
+    const cur = new Date(start + 'T00:00:00')
+    const last = new Date(end + 'T00:00:00')
+    while (cur <= last) {
+      const key = iso(cur)
+      acc += netByDay[key] || 0
+      out.push({
+        dia: cur.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        Saldo: Math.round(acc * 100) / 100,
+      })
+      cur.setDate(cur.getDate() + 1)
+    }
+    return out
+  }, [tx.rows, bills.rows, range])
+
   return (
     <div>
       <PageHeader title="Dashboard" subtitle="Visão geral da SENA COMERCIAL" />
@@ -96,6 +170,40 @@ export default function Dashboard() {
         <Kpi to="/financeiro" label="Despesas" value={brl(fin.expense)} color="text-danger" />
         <Kpi to="/crm" label="Pipeline" value={brl(pipeline)} color="text-brand-dark" />
         <Kpi to="/tarefas" label="Atrasadas" value={String(tarefasAtrasadas.length)} color={tarefasAtrasadas.length > 0 ? 'text-danger' : ''} />
+      </div>
+
+      {/* Fluxo de caixa acumulado (diário) */}
+      <div className="mt-6">
+        <Card className="p-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-neutral-200">
+            <span className="font-medium">Fluxo de caixa acumulado</span>
+            <div className="flex flex-wrap gap-1">
+              {PERIODS.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPeriod(p.id)}
+                  className={
+                    'rounded-lg px-2.5 py-1 text-xs font-medium transition ' +
+                    (period === p.id ? 'bg-brand text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200')
+                  }
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="h-72 p-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={dailyFlow}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                <XAxis dataKey="dia" fontSize={11} interval="preserveStartEnd" minTickGap={24} />
+                <YAxis fontSize={12} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                <Tooltip formatter={(v) => brl(v)} />
+                <Line type="monotone" dataKey="Saldo" stroke="#b8893a" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">

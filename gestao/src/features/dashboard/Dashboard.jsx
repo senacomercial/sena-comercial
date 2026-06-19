@@ -15,19 +15,35 @@ export default function Dashboard() {
   const tasks = useCollection('tasks', { order: 'due_date', ascending: true })
   const goals = useCollection('goals', { order: 'deadline', ascending: true })
 
-  const fin = useMemo(() => {
-    let income = 0, expense = 0
-    for (const r of tx.rows) {
-      if (r.type === 'income') income += Number(r.amount)
-      else expense += Number(r.amount)
-    }
-    return { income, expense, balance: income - expense }
-  }, [tx.rows])
+  // Resumo financeiro do MÊS ATUAL.
+  const month = useMemo(() => {
+    const now = new Date()
+    const y = now.getFullYear(), m = now.getMonth()
+    const start = `${y}-${String(m + 1).padStart(2, '0')}-01`
+    const end = new Date(y, m + 1, 0).toISOString().slice(0, 10)
+    const label = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
 
-  const aPagar = useMemo(
-    () => bills.rows.filter((b) => b.status !== 'pago' && b.kind === 'pagar').reduce((s, b) => s + Number(b.amount), 0),
-    [bills.rows]
-  )
+    let income = 0, expense = 0
+    for (const t of tx.rows) {
+      if (t.date >= start && t.date <= end) {
+        if (t.type === 'income') income += Number(t.amount)
+        else expense += Number(t.amount)
+      }
+    }
+    const saldo = income - expense
+
+    // Em aberto com vencimento até o fim do mês (inclui atrasadas ainda não quitadas).
+    let aReceber = 0, aPagar = 0
+    for (const b of bills.rows) {
+      if (b.status !== 'pago' && b.due_date <= end) {
+        if (b.kind === 'receber') aReceber += Number(b.amount)
+        else aPagar += Number(b.amount)
+      }
+    }
+    const resultadoEstimado = aReceber - aPagar
+    const saldoPrevisto = saldo + resultadoEstimado
+    return { label, income, expense, saldo, aReceber, aPagar, resultadoEstimado, saldoPrevisto }
+  }, [tx.rows, bills.rows])
 
   const pipeline = useMemo(
     () => leads.rows.filter((l) => !['ganho', 'perdido'].includes(l.stage)).reduce((s, l) => s + Number(l.estimated_value || 0), 0),
@@ -164,12 +180,16 @@ export default function Dashboard() {
     <div>
       <PageHeader title="Dashboard" subtitle="Visão geral da SENA COMERCIAL" />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <Kpi to="/financeiro" label="Saldo" value={brl(fin.balance)} color={fin.balance >= 0 ? 'text-success' : 'text-danger'} />
-        <Kpi to="/financeiro" label="Receitas" value={brl(fin.income)} color="text-success" />
-        <Kpi to="/financeiro" label="Despesas" value={brl(fin.expense)} color="text-danger" />
-        <Kpi to="/crm" label="Pipeline" value={brl(pipeline)} color="text-brand-dark" />
-        <Kpi to="/tarefas" label="Atrasadas" value={String(tarefasAtrasadas.length)} color={tarefasAtrasadas.length > 0 ? 'text-danger' : ''} />
+      {/* Resumo do mês atual */}
+      <div className="mb-2 text-sm font-medium capitalize text-neutral-500">Resumo de {month.label}</div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+        <Kpi to="/financeiro" label="Saldo do mês" value={brl(month.saldo)} color={month.saldo >= 0 ? 'text-success' : 'text-danger'} />
+        <Kpi to="/financeiro" label="Receitas" value={brl(month.income)} color="text-success" />
+        <Kpi to="/financeiro" label="Despesas" value={brl(month.expense)} color="text-danger" />
+        <Kpi to="/financeiro" label="A receber" value={brl(month.aReceber)} color="text-success" />
+        <Kpi to="/financeiro" label="A pagar" value={brl(month.aPagar)} color="text-danger" />
+        <Kpi label="Resultado estimado" value={brl(month.resultadoEstimado)} color={month.resultadoEstimado >= 0 ? 'text-success' : 'text-danger'} />
+        <Kpi label="Saldo previsto (fim do mês)" value={brl(month.saldoPrevisto)} color={month.saldoPrevisto >= 0 ? 'text-success' : 'text-danger'} />
       </div>
 
       {/* Fluxo de caixa acumulado (diário) */}

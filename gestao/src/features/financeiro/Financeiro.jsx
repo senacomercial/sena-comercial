@@ -370,7 +370,7 @@ function Contas() {
 function Dividas() {
   const { rows, create, remove, update, isLoading } = useCollection('debts', { order: 'created_at' })
   const [open, setOpen] = useState(false)
-  const blank = { creditor: '', total: '', balance: '', installments: '', next_due: today() }
+  const blank = { creditor: '', total: '', balance: '', installments: '', next_due: '' }
   const [form, setForm] = useState(blank)
 
   const totalDebt = useMemo(() => rows.reduce((s, r) => s + Number(r.balance || 0), 0), [rows])
@@ -382,6 +382,7 @@ function Dividas() {
       total: Number(form.total),
       balance: Number(form.balance || form.total),
       installments: form.installments ? Number(form.installments) : null,
+      next_due: form.next_due || null,
     })
     setOpen(false)
     setForm(blank)
@@ -433,7 +434,7 @@ function Dividas() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Input label="Parcelas" type="number" value={form.installments} onChange={(e) => setForm({ ...form, installments: e.target.value })} />
-            <Input label="Próximo vencimento" type="date" value={form.next_due} onChange={(e) => setForm({ ...form, next_due: e.target.value })} />
+            <Input label="Próximo vencimento (opcional)" type="date" value={form.next_due} onChange={(e) => setForm({ ...form, next_due: e.target.value })} />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>

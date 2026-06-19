@@ -12,6 +12,7 @@ import { Card, PageHeader, Badge } from '../../components/ui'
 export default function Dashboard() {
   const tx = useCollection('transactions', { order: 'date' })
   const bills = useCollection('bills', { order: 'due_date', ascending: true })
+  const categories = useCollection('categories', { order: 'name', ascending: true })
   const leads = useCollection('leads', { order: 'created_at' })
   const tasks = useCollection('tasks', { order: 'due_date', ascending: true })
   const goals = useCollection('goals', { order: 'deadline', ascending: true })
@@ -80,21 +81,29 @@ export default function Dashboard() {
     return { label, income, expense, saldo, aReceber, aPagar, resultadoEstimado, saldoPrevisto }
   }, [tx.rows, bills.rows, sumPeriod])
 
-  // MRR — faturamento recorrente mensal (independe do mês), baseado nos lançamentos recorrentes a receber.
+  // MRR — faturamento recorrente mensal (independe do mês), baseado nas CONTAS A RECEBER recorrentes.
   const mrr = useMemo(() => {
+    const catName = (id) => categories.rows.find((c) => c.id === id)?.name || 'Sem categoria'
+    // Uma ocorrência por grupo recorrente (evita contar todas as parcelas).
     const groups = {}
     for (const b of bills.rows) {
       if (!b.is_recurring || b.kind !== 'receber') continue
       const key = b.recurrence_group || b.id
-      // Uma ocorrência por grupo recorrente.
-      if (!groups[key]) groups[key] = { amount: Number(b.amount || 0), recurrence: b.recurrence }
+      if (!groups[key]) groups[key] = b
     }
     let total = 0
-    for (const g of Object.values(groups)) {
-      total += g.amount * (MONTHLY_FACTOR[g.recurrence] || 0)
+    const byCat = {}
+    for (const b of Object.values(groups)) {
+      const monthly = Number(b.amount || 0) * (MONTHLY_FACTOR[b.recurrence] || 0)
+      total += monthly
+      const name = catName(b.category_id)
+      byCat[name] = (byCat[name] || 0) + monthly
     }
-    return total
-  }, [bills.rows])
+    const breakdown = Object.entries(byCat)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+    return { total, breakdown }
+  }, [bills.rows, categories.rows])
 
   const pipeline = useMemo(
     () => leads.rows.filter((l) => !['ganho', 'perdido'].includes(l.stage)).reduce((s, l) => s + Number(l.estimated_value || 0), 0),
@@ -233,13 +242,33 @@ export default function Dashboard() {
 
       {/* MRR — faturamento recorrente mensal */}
       <div className="mb-4">
-        <Card className="flex items-center justify-between border-l-4 border-brand bg-brand/5">
-          <div>
-            <div className="text-sm text-neutral-500">MRR · Faturamento recorrente mensal</div>
-            <div className="mt-1 text-3xl font-semibold text-brand-dark">{brl(mrr)}</div>
-            <div className="text-xs text-neutral-400">baseado nos recebimentos recorrentes cadastrados</div>
+        <Card className="border-l-4 border-brand bg-brand/5">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-neutral-500">MRR · Faturamento recorrente mensal</div>
+              <div className="mt-1 text-3xl font-semibold text-brand-dark">{brl(mrr.total)}</div>
+              <div className="text-xs text-neutral-400">baseado nas contas a receber recorrentes</div>
+            </div>
+            <span className="text-4xl">🔁</span>
           </div>
-          <span className="text-4xl">🔁</span>
+
+          {mrr.breakdown.length > 0 ? (
+            <div className="mt-4 border-t border-brand/15 pt-3">
+              <div className="mb-2 text-xs font-medium text-neutral-500">Por categoria de receita</div>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {mrr.breakdown.map((c) => (
+                  <div key={c.name} className="flex items-center justify-between rounded-lg bg-white/70 px-3 py-2">
+                    <span className="truncate text-sm text-neutral-600">{c.name}</span>
+                    <span className="text-sm font-semibold text-brand-dark">{brl(c.value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-3 border-t border-brand/15 pt-3 text-xs text-neutral-400">
+              Cadastre recebimentos recorrentes em <strong>Financeiro → Contas a receber</strong> (marque "Recebimento recorrente" e escolha a categoria) para ver o MRR por categoria aqui.
+            </div>
+          )}
         </Card>
       </div>
 

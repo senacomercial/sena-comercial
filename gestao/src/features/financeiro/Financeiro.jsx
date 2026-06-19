@@ -4,6 +4,7 @@ import { brl, dateBR, today, daysUntil } from '../../lib/format'
 import {
   Button, Card, Modal, Input, Select, Badge, PageHeader, EmptyState,
 } from '../../components/ui'
+import { buildInstallments } from '../../lib/installments'
 import Categorias from './Categorias'
 
 const TABS = [
@@ -210,21 +211,71 @@ function Lancamentos() {
 /* ---------------- Contas a pagar/receber ---------------- */
 function Contas() {
   const { rows, create, update, remove, isLoading } = useCollection('bills', { order: 'due_date', ascending: true })
+  const { rows: categories } = useCollection('categories', { order: 'name', ascending: true })
   const [open, setOpen] = useState(false)
-  const blank = { description: '', amount: '', due_date: today(), kind: 'pagar', status: 'aberto' }
+  const [saving, setSaving] = useState(false)
+  const blank = {
+    description: '', amount: '', due_date: today(), kind: 'pagar', status: 'aberto',
+    category_id: '',
+    recurring: false, recurrence: 'mensal', occurrences: '12',
+  }
   const [form, setForm] = useState(blank)
+
+  const catOptions = useMemo(() => {
+    const wantType = form.kind === 'receber' ? 'income' : 'expense'
+    const parents = categories.filter((c) => !c.parent_id && c.type === wantType)
+    const out = []
+    for (const p of parents) {
+      out.push({ id: p.id, label: p.name })
+      categories.filter((c) => c.parent_id === p.id).forEach((s) => out.push({ id: s.id, label: `  └ ${s.name}` }))
+    }
+    return out
+  }, [categories, form.kind])
 
   const save = async (e) => {
     e.preventDefault()
-    await create.mutateAsync({ ...form, amount: Number(form.amount) })
-    setOpen(false)
-    setForm(blank)
+    setSaving(true)
+    try {
+      const base = {
+        description: form.description,
+        amount: Number(form.amount),
+        kind: form.kind,
+        status: form.status,
+        category_id: form.category_id || null,
+      }
+      if (form.recurring) {
+        // Gera N ocorrências recorrentes a partir da data de vencimento.
+        const n = Math.max(1, parseInt(form.occurrences || '1', 10))
+        const group = crypto.randomUUID()
+        const series = buildInstallments({
+          startDate: form.due_date,
+          installments: n,
+          periodicity: form.recurrence,
+          amountPerInstallment: Number(form.amount),
+        })
+        for (const p of series) {
+          await create.mutateAsync({
+            ...base,
+            due_date: p.due_date,
+            is_recurring: true,
+            recurrence: form.recurrence,
+            recurrence_group: group,
+          })
+        }
+      } else {
+        await create.mutateAsync({ ...base, due_date: form.due_date })
+      }
+      setOpen(false)
+      setForm(blank)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setOpen(true)}>+ Nova conta</Button>
+        <Button onClick={() => { setForm(blank); setOpen(true) }}>+ Nova conta</Button>
       </div>
       {isLoading ? (
         <p className="text-neutral-400">Carregando…</p>
@@ -238,7 +289,10 @@ function Contas() {
             return (
               <Card key={r.id} className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">{r.description}</div>
+                  <div className="font-medium flex items-center gap-2">
+                    {r.description}
+                    {r.is_recurring && <Badge color="brand">↻ {r.recurrence}</Badge>}
+                  </div>
                   <div className="text-sm text-neutral-500">
                     {r.kind === 'pagar' ? 'A pagar' : 'A receber'} · vence {dateBR(r.due_date)}
                     {overdue && <span className="ml-2 text-danger font-medium">atrasada</span>}
@@ -265,15 +319,46 @@ function Contas() {
           <Input label="Descrição" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
           <div className="grid grid-cols-2 gap-3">
             <Input label="Valor (R$)" type="number" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
-            <Input label="Vencimento" type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} required />
+            <Input label={form.recurring ? 'Primeiro vencimento' : 'Vencimento'} type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} required />
           </div>
-          <Select label="Tipo" value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}>
-            <option value="pagar">A pagar</option>
-            <option value="receber">A receber</option>
-          </Select>
+          <div className="grid grid-cols-2 gap-3">
+            <Select label="Tipo" value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value, category_id: '' })}>
+              <option value="pagar">A pagar</option>
+              <option value="receber">A receber</option>
+            </Select>
+            <Select label="Categoria" value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}>
+              <option value="">— Sem categoria —</option>
+              {catOptions.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+            </Select>
+          </div>
+
+          {/* Recorrência */}
+          <div className="rounded-lg border border-neutral-200 p-3">
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={form.recurring} onChange={(e) => setForm({ ...form, recurring: e.target.checked })} />
+              {form.kind === 'pagar' ? 'Pagamento recorrente' : 'Recebimento recorrente'}
+            </label>
+            {form.recurring && (
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <Select label="Frequência" value={form.recurrence} onChange={(e) => setForm({ ...form, recurrence: e.target.value })}>
+                  <option value="diaria">Diária</option>
+                  <option value="semanal">Semanal</option>
+                  <option value="quinzenal">A cada 15 dias</option>
+                  <option value="mensal">Mensal</option>
+                </Select>
+                <Input label="Quantas ocorrências" type="number" min="1" value={form.occurrences} onChange={(e) => setForm({ ...form, occurrences: e.target.value })} />
+              </div>
+            )}
+            {form.recurring && (
+              <p className="mt-2 text-xs text-neutral-400">
+                Serão criadas {form.occurrences || 0} contas de {brl(Number(form.amount || 0))} cada.
+              </p>
+            )}
+          </div>
+
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button type="submit">Salvar</Button>
+            <Button type="submit" disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</Button>
           </div>
         </form>
       </Modal>

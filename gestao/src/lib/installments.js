@@ -1,14 +1,27 @@
 // Geração de parcelas conforme periodicidade.
 
 export const PERIODICITIES = [
+  { id: 'diaria', label: 'Diária', days: 1 },
   { id: 'semanal', label: 'Semanal', days: 7 },
-  { id: 'quinzenal', label: 'Quinzenal (a cada 2 semanas)', days: 14 },
+  { id: 'quinzenal', label: 'Quinzenal (a cada 15 dias)', days: 15 },
   { id: 'mensal', label: 'Mensal', months: 1 },
   { id: 'bimestral', label: 'Bimestral', months: 2 },
   { id: 'trimestral', label: 'Trimestral', months: 3 },
   { id: 'semestral', label: 'Semestral', months: 6 },
   { id: 'anual', label: 'Anual', months: 12 },
 ]
+
+// Fator de normalização para faturamento mensal (MRR) por frequência.
+export const MONTHLY_FACTOR = {
+  diaria: 30,
+  semanal: 52 / 12,   // ~4.333 semanas por mês
+  quinzenal: 2,
+  mensal: 1,
+  bimestral: 1 / 2,
+  trimestral: 1 / 3,
+  semestral: 1 / 6,
+  anual: 1 / 12,
+}
 
 // Soma um intervalo de periodicidade a uma data (string yyyy-mm-dd) e retorna yyyy-mm-dd.
 export function addPeriod(dateStr, periodicityId, count) {

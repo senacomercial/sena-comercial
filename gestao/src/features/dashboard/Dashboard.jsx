@@ -6,6 +6,7 @@ import {
 } from 'recharts'
 import { useCollection } from '../../lib/useCollection'
 import { brl, daysUntil } from '../../lib/format'
+import { MONTHLY_FACTOR } from '../../lib/installments'
 import { Card, PageHeader, Badge } from '../../components/ui'
 
 export default function Dashboard() {
@@ -15,13 +16,47 @@ export default function Dashboard() {
   const tasks = useCollection('tasks', { order: 'due_date', ascending: true })
   const goals = useCollection('goals', { order: 'deadline', ascending: true })
 
-  // Resumo financeiro do MÊS ATUAL.
+  // Periodicidade do resumo financeiro (escolhível).
+  const [sumPeriod, setSumPeriod] = useState('mes')
+  const SUM_PERIODS = [
+    { id: 'semana', label: 'Semana' },
+    { id: 'mes', label: 'Mês' },
+    { id: 'trimestre', label: 'Trimestre' },
+    { id: 'semestre', label: 'Semestre' },
+    { id: 'ano', label: 'Ano' },
+  ]
+
+  // Resumo financeiro do período escolhido.
   const month = useMemo(() => {
     const now = new Date()
     const y = now.getFullYear(), m = now.getMonth()
-    const start = `${y}-${String(m + 1).padStart(2, '0')}-01`
-    const end = new Date(y, m + 1, 0).toISOString().slice(0, 10)
-    const label = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+    const iso = (d) => d.toISOString().slice(0, 10)
+    let startD, endD, label
+    if (sumPeriod === 'semana') {
+      const dow = (now.getDay() + 6) % 7 // segunda = 0
+      startD = new Date(now); startD.setDate(now.getDate() - dow)
+      endD = new Date(startD); endD.setDate(startD.getDate() + 6)
+      label = 'esta semana'
+    } else if (sumPeriod === 'trimestre') {
+      const q = Math.floor(m / 3)
+      startD = new Date(y, q * 3, 1)
+      endD = new Date(y, q * 3 + 3, 0)
+      label = `${q + 1}º trimestre de ${y}`
+    } else if (sumPeriod === 'semestre') {
+      const h = m < 6 ? 0 : 1
+      startD = new Date(y, h * 6, 1)
+      endD = new Date(y, h * 6 + 6, 0)
+      label = `${h + 1}º semestre de ${y}`
+    } else if (sumPeriod === 'ano') {
+      startD = new Date(y, 0, 1)
+      endD = new Date(y, 12, 0)
+      label = String(y)
+    } else {
+      startD = new Date(y, m, 1)
+      endD = new Date(y, m + 1, 0)
+      label = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+    }
+    const start = iso(startD), end = iso(endD)
 
     let income = 0, expense = 0
     for (const t of tx.rows) {
@@ -32,7 +67,7 @@ export default function Dashboard() {
     }
     const saldo = income - expense
 
-    // Em aberto com vencimento até o fim do mês (inclui atrasadas ainda não quitadas).
+    // Em aberto com vencimento até o fim do período (inclui atrasadas ainda não quitadas).
     let aReceber = 0, aPagar = 0
     for (const b of bills.rows) {
       if (b.status !== 'pago' && b.due_date <= end) {
@@ -43,7 +78,23 @@ export default function Dashboard() {
     const resultadoEstimado = aReceber - aPagar
     const saldoPrevisto = saldo + resultadoEstimado
     return { label, income, expense, saldo, aReceber, aPagar, resultadoEstimado, saldoPrevisto }
-  }, [tx.rows, bills.rows])
+  }, [tx.rows, bills.rows, sumPeriod])
+
+  // MRR — faturamento recorrente mensal (independe do mês), baseado nos lançamentos recorrentes a receber.
+  const mrr = useMemo(() => {
+    const groups = {}
+    for (const b of bills.rows) {
+      if (!b.is_recurring || b.kind !== 'receber') continue
+      const key = b.recurrence_group || b.id
+      // Uma ocorrência por grupo recorrente.
+      if (!groups[key]) groups[key] = { amount: Number(b.amount || 0), recurrence: b.recurrence }
+    }
+    let total = 0
+    for (const g of Object.values(groups)) {
+      total += g.amount * (MONTHLY_FACTOR[g.recurrence] || 0)
+    }
+    return total
+  }, [bills.rows])
 
   const pipeline = useMemo(
     () => leads.rows.filter((l) => !['ganho', 'perdido'].includes(l.stage)).reduce((s, l) => s + Number(l.estimated_value || 0), 0),
@@ -180,16 +231,44 @@ export default function Dashboard() {
     <div>
       <PageHeader title="Dashboard" subtitle="Visão geral da SENA COMERCIAL" />
 
-      {/* Resumo do mês atual */}
-      <div className="mb-2 text-sm font-medium capitalize text-neutral-500">Resumo de {month.label}</div>
+      {/* MRR — faturamento recorrente mensal */}
+      <div className="mb-4">
+        <Card className="flex items-center justify-between border-l-4 border-brand bg-brand/5">
+          <div>
+            <div className="text-sm text-neutral-500">MRR · Faturamento recorrente mensal</div>
+            <div className="mt-1 text-3xl font-semibold text-brand-dark">{brl(mrr)}</div>
+            <div className="text-xs text-neutral-400">baseado nos recebimentos recorrentes cadastrados</div>
+          </div>
+          <span className="text-4xl">🔁</span>
+        </Card>
+      </div>
+
+      {/* Resumo financeiro (periodicidade escolhível) */}
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <span className="text-sm font-medium capitalize text-neutral-500">Resumo · {month.label}</span>
+        <div className="flex flex-wrap gap-1">
+          {SUM_PERIODS.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setSumPeriod(p.id)}
+              className={
+                'rounded-lg px-2.5 py-1 text-xs font-medium transition ' +
+                (sumPeriod === p.id ? 'bg-brand text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200')
+              }
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
-        <Kpi to="/financeiro" label="Saldo do mês" value={brl(month.saldo)} color={month.saldo >= 0 ? 'text-success' : 'text-danger'} />
+        <Kpi to="/financeiro" label="Saldo do período" value={brl(month.saldo)} color={month.saldo >= 0 ? 'text-success' : 'text-danger'} />
         <Kpi to="/financeiro" label="Receitas" value={brl(month.income)} color="text-success" />
         <Kpi to="/financeiro" label="Despesas" value={brl(month.expense)} color="text-danger" />
         <Kpi to="/financeiro" label="A receber" value={brl(month.aReceber)} color="text-success" />
         <Kpi to="/financeiro" label="A pagar" value={brl(month.aPagar)} color="text-danger" />
         <Kpi label="Resultado estimado" value={brl(month.resultadoEstimado)} color={month.resultadoEstimado >= 0 ? 'text-success' : 'text-danger'} />
-        <Kpi label="Saldo previsto (fim do mês)" value={brl(month.saldoPrevisto)} color={month.saldoPrevisto >= 0 ? 'text-success' : 'text-danger'} />
+        <Kpi label="Saldo previsto (fim do período)" value={brl(month.saldoPrevisto)} color={month.saldoPrevisto >= 0 ? 'text-success' : 'text-danger'} />
       </div>
 
       {/* Fluxo de caixa acumulado (diário) */}

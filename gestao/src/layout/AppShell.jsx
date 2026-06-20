@@ -4,11 +4,11 @@ import { useAuth } from '../auth/AuthProvider'
 
 const nav = [
   { to: '/', label: 'Dashboard', icon: '📊', end: true },
-  { to: '/financeiro', label: 'Financeiro', icon: '💰' },
   { to: '/crm', label: 'CRM · Leads', icon: '🎯' },
-  { to: '/clientes', label: 'Clientes', icon: '🤝' },
-  { to: '/tarefas', label: 'Tarefas', icon: '✅' },
-  { to: '/projetos', label: 'Projetos', icon: '📁' },
+  { to: '/clientes', label: 'Clientes ▸ Projetos ▸ Tarefas', icon: '🤝' },
+  { to: '/projetos', label: 'Projetos (todos)', icon: '📁' },
+  { to: '/tarefas', label: 'Tarefas (todas)', icon: '✅' },
+  { to: '/financeiro', label: 'Financeiro', icon: '💰' },
   { to: '/metas', label: 'Metas & Sonhos', icon: '⭐' },
 ]
 

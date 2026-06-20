@@ -236,6 +236,7 @@ function Contas() {
   const { rows: categories } = useCollection('categories', { order: 'name', ascending: true })
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [viewMode, setViewMode] = useState('grid')
   const blank = {
     description: '', amount: '', due_date: today(), kind: 'pagar', status: 'aberto',
     category_id: '',
@@ -296,14 +297,28 @@ function Contas() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`px-3 py-2 text-sm rounded-lg transition ${viewMode === 'grid' ? 'bg-brand text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}`}
+          >
+            Grade
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`px-3 py-2 text-sm rounded-lg transition ${viewMode === 'list' ? 'bg-brand text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}`}
+          >
+            Lista
+          </button>
+        </div>
         <Button onClick={() => { setForm(blank); setOpen(true) }}>+ Nova conta</Button>
       </div>
       {isLoading ? (
         <p className="text-neutral-400">Carregando…</p>
       ) : rows.length === 0 ? (
         <EmptyState title="Nenhuma conta cadastrada" hint="Cadastre contas a pagar ou a receber com vencimento." />
-      ) : (
+      ) : viewMode === 'grid' ? (
         <div className="grid gap-3 sm:grid-cols-2">
           {rows.map((r) => {
             const d = daysUntil(r.due_date)
@@ -334,6 +349,49 @@ function Contas() {
             )
           })}
         </div>
+      ) : (
+        <Card className="overflow-x-auto p-0">
+          <table className="w-full text-sm">
+            <thead className="border-b border-neutral-200 text-left text-neutral-500">
+              <tr>
+                <th className="px-4 py-3">Vencimento</th>
+                <th className="px-4 py-3">Descrição</th>
+                <th className="px-4 py-3">Tipo</th>
+                <th className="px-4 py-3 text-right">Valor</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => {
+                const d = daysUntil(r.due_date)
+                const overdue = r.status === 'aberto' && d != null && d < 0
+                return (
+                  <tr key={r.id} className="border-b border-neutral-100 last:border-0">
+                    <td className="px-4 py-3 font-medium">{dateBR(r.due_date)}</td>
+                    <td className="px-4 py-3">
+                      <div className="font-medium">{r.description}</div>
+                      {r.is_recurring && <Badge color="brand" className="text-xs">↻ {r.recurrence}</Badge>}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-500">{r.kind === 'pagar' ? 'A pagar' : 'A receber'}</td>
+                    <td className="px-4 py-3 text-right font-semibold">{brl(r.amount)}</td>
+                    <td className="px-4 py-3">
+                      <Badge color={r.status === 'pago' ? 'green' : overdue ? 'red' : 'amber'}>
+                        {r.status === 'pago' ? 'pago' : overdue ? 'atrasada' : 'aberto'}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
+                      {r.status !== 'pago' && (
+                        <button className="text-xs text-success hover:underline" onClick={() => update.mutate({ id: r.id, status: 'pago' })}>baixar</button>
+                      )}
+                      <button className="text-xs text-neutral-400 hover:text-danger" onClick={() => remove.mutate(r.id)}>excluir</button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </Card>
       )}
 
       <Modal open={open} onClose={() => setOpen(false)} title="Nova conta">

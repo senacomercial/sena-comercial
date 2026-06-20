@@ -472,6 +472,7 @@ function Dividas() {
 function AllocationModal({ transaction, projects, projectCosts, onClose }) {
   const { create, remove } = useCollection('project_costs')
   const [allocations, setAllocations] = useState([])
+  const [saving, setSaving] = useState(false)
 
   // Carrega alocações existentes
   const existing = projectCosts.filter((pc) => pc.transaction_id === transaction.id)
@@ -495,20 +496,25 @@ function AllocationModal({ transaction, projects, projectCosts, onClose }) {
   }
 
   const save = async () => {
-    for (const a of allocations) {
-      if (a.project_id && a.amount) {
-        await create.mutateAsync({
-          project_id: a.project_id,
-          transaction_id: transaction.id,
-          amount: Number(a.amount),
-        })
+    setSaving(true)
+    try {
+      for (const a of allocations) {
+        if (a.project_id && a.amount) {
+          await create.mutateAsync({
+            project_id: a.project_id,
+            transaction_id: transaction.id,
+            amount: Number(a.amount),
+          })
+        }
       }
+      onClose()
+    } finally {
+      setSaving(false)
     }
-    onClose()
   }
 
-  const deleteExisting = async (id) => {
-    await remove.mutate(id)
+  const deleteExisting = (id) => {
+    remove.mutate(id)
   }
 
   return (
@@ -601,7 +607,7 @@ function AllocationModal({ transaction, projects, projectCosts, onClose }) {
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
-          <Button type="button" onClick={save} disabled={allocations.length === 0}>Salvar</Button>
+          <Button type="button" onClick={save} disabled={allocations.length === 0 || saving}>{saving ? 'Salvando…' : 'Salvar'}</Button>
         </div>
       </div>
     </Modal>

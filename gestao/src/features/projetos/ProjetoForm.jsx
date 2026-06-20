@@ -81,6 +81,13 @@ export default function ProjetoForm({ open, onClose, editing, defaultClientId })
 
   const save = async (e) => {
     e.preventDefault()
+
+    // Validação: se tem recebimento, valor deve ser > 0
+    if (form.has_receivable && Number(form.receivable_value || 0) <= 0) {
+      alert('Por favor, preencha um valor maior que 0 para o recebimento.')
+      return
+    }
+
     setSaving(true)
     try {
       const payload = {
@@ -184,9 +191,17 @@ export default function ProjetoForm({ open, onClose, editing, defaultClientId })
                 <Input
                   label={form.is_recurring ? 'Valor por recebimento (R$)' : 'Valor total do contrato (R$)'}
                   type="number" step="0.01" value={form.receivable_value}
-                  onChange={(e) => setForm({ ...form, receivable_value: e.target.value })} required
+                  onChange={(e) => setForm({ ...form, receivable_value: e.target.value })}
+                  required
+                  placeholder="0.00"
                 />
-                <Input label="Data do 1º recebimento" type="date" value={form.payment_start} onChange={(e) => setForm({ ...form, payment_start: e.target.value })} required />
+                <Input
+                  label="Data do 1º recebimento"
+                  type="date"
+                  value={form.payment_start}
+                  onChange={(e) => setForm({ ...form, payment_start: e.target.value })}
+                  required
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -216,14 +231,20 @@ export default function ProjetoForm({ open, onClose, editing, defaultClientId })
                 </label>
               )}
 
+              {Number(form.receivable_value || 0) <= 0 && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
+                  ⚠️ Preencha um valor maior que 0 para gerar as contas a receber.
+                </div>
+              )}
+
               {preview.length > 0 && (!editing || form.regenerate) && (
-                <div className="rounded-lg bg-neutral-50 p-2 text-xs">
-                  <div className="mb-1 font-medium text-neutral-600">
-                    {preview.length} recebimento(s) — total {brl(preview.reduce((s, p) => s + p.amount, 0))}
+                <div className="rounded-lg bg-green-50 border border-green-200 p-2 text-xs">
+                  <div className="mb-1 font-medium text-green-800">
+                    ✓ {preview.length} recebimento(s) serão criados — total {brl(preview.reduce((s, p) => s + p.amount, 0))}
                   </div>
                   <div className="max-h-28 overflow-y-auto space-y-0.5">
                     {preview.slice(0, 24).map((p) => (
-                      <div key={p.number} className="flex justify-between text-neutral-500">
+                      <div key={p.number} className="flex justify-between text-green-700">
                         <span>{p.number}/{p.total} · {dateBR(p.due_date)}</span>
                         <span>{brl(p.amount)}</span>
                       </div>

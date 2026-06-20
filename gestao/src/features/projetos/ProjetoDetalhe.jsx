@@ -25,6 +25,7 @@ export default function ProjetoDetalhe() {
   const bills = useCollection('bills', { order: 'due_date', ascending: true })
   const tasks = useCollection('tasks', { order: 'due_date', ascending: true })
   const projectCosts = useCollection('project_costs')
+  const transactions = useCollection('transactions', { order: 'date' })
 
   const [editOpen, setEditOpen] = useState(false)
   const [taskOpen, setTaskOpen] = useState(false)
@@ -148,14 +149,20 @@ export default function ProjetoDetalhe() {
           <p className="p-4 text-sm text-neutral-400">Nenhum custo alocado ainda. Aloque despesas na aba Financeiro.</p>
         ) : (
           <ul className="divide-y divide-neutral-100">
-            {allocatedCosts.map((c) => (
-              <li key={c.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
-                <span className="text-neutral-600">{c.created_at ? dateBR(c.created_at) : '—'}</span>
-                <div className="flex items-center gap-3">
-                  <span className="font-medium text-danger">{brl(c.amount)}</span>
-                </div>
-              </li>
-            ))}
+            {allocatedCosts.map((c) => {
+              const trans = transactions.rows.find((t) => t.id === c.transaction_id)
+              return (
+                <li key={c.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                  <div>
+                    <div className="font-medium">{trans?.description || '?'}</div>
+                    <div className="text-xs text-neutral-400">{trans?.date ? dateBR(trans.date) : '—'}</div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium text-danger">{brl(c.amount)}</span>
+                  </div>
+                </li>
+              )
+            })}
           </ul>
         )}
       </Card>

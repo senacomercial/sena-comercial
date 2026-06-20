@@ -49,8 +49,11 @@ export default function Financeiro() {
 function Lancamentos() {
   const { rows, create, update, remove, isLoading } = useCollection('transactions', { order: 'date' })
   const { rows: categories } = useCollection('categories', { order: 'name', ascending: true })
+  const { rows: projects } = useCollection('projects', { order: 'name', ascending: true })
+  const { rows: projectCosts } = useCollection('project_costs')
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [allocating, setAllocating] = useState(null)
 
   const totals = useMemo(() => {
     let income = 0, expense = 0
@@ -136,27 +139,44 @@ function Lancamentos() {
                 <th className="px-4 py-3">Categoria</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Valor</th>
+                <th className="px-4 py-3">Alocação</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} className="border-b border-neutral-100 last:border-0">
-                  <td className="px-4 py-3 text-neutral-500">{dateBR(r.date)}</td>
-                  <td className="px-4 py-3 font-medium">{r.description}</td>
-                  <td className="px-4 py-3 text-neutral-500">{r.category || '—'}</td>
-                  <td className="px-4 py-3">
-                    <Badge color={r.status === 'pago' ? 'green' : 'amber'}>{r.status}</Badge>
-                  </td>
-                  <td className={'px-4 py-3 text-right font-semibold ' + (r.type === 'income' ? 'text-success' : 'text-danger')}>
-                    {r.type === 'income' ? '+' : '−'} {brl(r.amount)}
-                  </td>
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
-                    <button onClick={() => openEdit(r)} className="text-neutral-400 hover:text-brand-dark">editar</button>
-                    <button onClick={() => remove.mutate(r.id)} className="ml-3 text-neutral-400 hover:text-danger">excluir</button>
-                  </td>
-                </tr>
-              ))}
+              {rows.map((r) => {
+                const allocated = projectCosts.filter((pc) => pc.transaction_id === r.id)
+                const totalAllocated = allocated.reduce((s, pc) => s + Number(pc.amount), 0)
+                return (
+                  <tr key={r.id} className="border-b border-neutral-100 last:border-0">
+                    <td className="px-4 py-3 text-neutral-500">{dateBR(r.date)}</td>
+                    <td className="px-4 py-3 font-medium">{r.description}</td>
+                    <td className="px-4 py-3 text-neutral-500">{r.category || '—'}</td>
+                    <td className="px-4 py-3">
+                      <Badge color={r.status === 'pago' ? 'green' : 'amber'}>{r.status}</Badge>
+                    </td>
+                    <td className={'px-4 py-3 text-right font-semibold ' + (r.type === 'income' ? 'text-success' : 'text-danger')}>
+                      {r.type === 'income' ? '+' : '−'} {brl(r.amount)}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {r.type === 'expense' ? (
+                        <span className="text-neutral-600">
+                          {brl(totalAllocated)} / {brl(r.amount)}
+                        </span>
+                      ) : (
+                        <span className="text-neutral-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right whitespace-nowrap space-x-3">
+                      {r.type === 'expense' && (
+                        <button onClick={() => setAllocating(r)} className="text-brand-dark hover:underline">alocar</button>
+                      )}
+                      <button onClick={() => openEdit(r)} className="text-neutral-400 hover:text-brand-dark">editar</button>
+                      <button onClick={() => remove.mutate(r.id)} className="text-neutral-400 hover:text-danger">excluir</button>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </Card>
@@ -204,6 +224,8 @@ function Lancamentos() {
           </div>
         </form>
       </Modal>
+
+      {allocating && <AllocationModal transaction={allocating} projects={projects} projectCosts={projectCosts} onClose={() => setAllocating(null)} />}
     </div>
   )
 }
@@ -443,6 +465,146 @@ function Dividas() {
         </form>
       </Modal>
     </div>
+  )
+}
+
+/* Alocação de custo a projetos */
+function AllocationModal({ transaction, projects, projectCosts, onClose }) {
+  const { create, remove } = useCollection('project_costs')
+  const [allocations, setAllocations] = useState([])
+
+  // Carrega alocações existentes
+  const existing = projectCosts.filter((pc) => pc.transaction_id === transaction.id)
+
+  const totalAllocated = allocations.reduce((s, a) => s + Number(a.amount || 0), 0)
+    + existing.reduce((s, e) => s + Number(e.amount), 0)
+  const remaining = Number(transaction.amount) - totalAllocated
+
+  const addAllocation = () => {
+    setAllocations([...allocations, { project_id: '', amount: '' }])
+  }
+
+  const removeAllocation = (idx) => {
+    setAllocations(allocations.filter((_, i) => i !== idx))
+  }
+
+  const updateAllocation = (idx, field, value) => {
+    const updated = [...allocations]
+    updated[idx][field] = value
+    setAllocations(updated)
+  }
+
+  const save = async () => {
+    for (const a of allocations) {
+      if (a.project_id && a.amount) {
+        await create.mutateAsync({
+          project_id: a.project_id,
+          transaction_id: transaction.id,
+          amount: Number(a.amount),
+        })
+      }
+    }
+    onClose()
+  }
+
+  const deleteExisting = async (id) => {
+    await remove.mutate(id)
+  }
+
+  return (
+    <Modal open={true} onClose={onClose} title={`Alocar custo: ${transaction.description}`}>
+      <div className="space-y-4">
+        <div className="text-sm text-neutral-600">
+          Valor total: <strong>{brl(transaction.amount)}</strong>
+        </div>
+
+        <div className="rounded-lg border border-neutral-200 p-3">
+          <div className="text-xs font-medium text-neutral-500 mb-2">Alocações existentes</div>
+          {existing.length === 0 ? (
+            <p className="text-xs text-neutral-400">Nenhuma alocação ainda</p>
+          ) : (
+            <div className="space-y-2">
+              {existing.map((e) => {
+                const proj = projects.find((p) => p.id === e.project_id)
+                return (
+                  <div key={e.id} className="flex items-center justify-between text-sm">
+                    <span>{proj?.name || '?'}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">{brl(e.amount)}</span>
+                      <button
+                        type="button"
+                        onClick={() => deleteExisting(e.id)}
+                        className="text-xs text-neutral-400 hover:text-danger"
+                      >
+                        remover
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <div className="text-xs font-medium text-neutral-500 mb-2">Adicionar alocação</div>
+          {allocations.length === 0 && (
+            <p className="text-xs text-neutral-400 mb-2">Nenhuma alocação nova ainda</p>
+          )}
+          <div className="space-y-2">
+            {allocations.map((a, idx) => (
+              <div key={idx} className="flex gap-2 items-end">
+                <Select
+                  label="Projeto"
+                  value={a.project_id}
+                  onChange={(e) => updateAllocation(idx, 'project_id', e.target.value)}
+                  className="flex-1"
+                >
+                  <option value="">— Selecione —</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </Select>
+                <Input
+                  label="Valor (R$)"
+                  type="number"
+                  step="0.01"
+                  value={a.amount}
+                  onChange={(e) => updateAllocation(idx, 'amount', e.target.value)}
+                  className="w-24"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeAllocation(idx)}
+                  className="text-xs text-neutral-400 hover:text-danger mb-1"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={addAllocation}
+            className="mt-2 text-xs text-brand-dark hover:underline"
+          >
+            + Adicionar outra
+          </button>
+        </div>
+
+        <div className="rounded-lg border border-neutral-100 bg-neutral-50 p-2 text-xs">
+          <div>Alocado: {brl(totalAllocated)}</div>
+          <div className={remaining >= 0 ? 'text-success' : 'text-danger'}>
+            Restante: {brl(remaining)}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button type="button" onClick={save} disabled={allocations.length === 0}>Salvar</Button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 

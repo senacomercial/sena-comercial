@@ -24,6 +24,7 @@ export default function ProjetoDetalhe() {
   const clients = useCollection('clients', { order: 'name', ascending: true })
   const bills = useCollection('bills', { order: 'due_date', ascending: true })
   const tasks = useCollection('tasks', { order: 'due_date', ascending: true })
+  const projectCosts = useCollection('project_costs')
 
   const [editOpen, setEditOpen] = useState(false)
   const [taskOpen, setTaskOpen] = useState(false)
@@ -35,16 +36,21 @@ export default function ProjetoDetalhe() {
   const client = clients.rows.find((c) => c.id === project?.client_id)
   const projectBills = useMemo(() => bills.rows.filter((b) => b.project_id === projectId), [bills.rows, projectId])
   const projectTasks = useMemo(() => tasks.rows.filter((t) => t.project_id === projectId), [tasks.rows, projectId])
+  const allocatedCosts = useMemo(() => projectCosts.rows.filter((pc) => pc.project_id === projectId), [projectCosts.rows, projectId])
 
   const fin = useMemo(() => {
-    let total = 0, recebido = 0, aberto = 0
+    let total = 0, recebido = 0, aberto = 0, custos = 0
     for (const b of projectBills) {
       total += Number(b.amount || 0)
       if (b.status === 'pago') recebido += Number(b.amount || 0)
       else aberto += Number(b.amount || 0)
     }
-    return { total, recebido, aberto }
-  }, [projectBills])
+    for (const c of allocatedCosts) {
+      custos += Number(c.amount || 0)
+    }
+    const lucro = total - custos
+    return { total, recebido, aberto, custos, lucro }
+  }, [projectBills, allocatedCosts])
 
   const saveTask = async (e) => {
     e.preventDefault()
@@ -90,14 +96,15 @@ export default function ProjetoDetalhe() {
       </div>
 
       {/* Financeiro do projeto */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
         <Kpi label="Valor contratado" value={brl(fin.total)} />
         <Kpi label="Recebido" value={brl(fin.recebido)} color="text-success" />
         <Kpi label="A receber" value={brl(fin.aberto)} color="text-danger" />
+        <Kpi label="Custos" value={brl(fin.custos)} color="text-neutral-600" />
         <Kpi
-          label="Recorrência"
-          value={project.is_recurring ? `${project.recurrence}` : (project.receivable_value ? 'parcelado' : '—')}
-          color="text-brand-dark"
+          label="Lucro"
+          value={brl(fin.lucro)}
+          color={fin.lucro >= 0 ? 'text-success' : 'text-danger'}
         />
       </div>
 
@@ -127,6 +134,28 @@ export default function ProjetoDetalhe() {
                 </li>
               )
             })}
+          </ul>
+        )}
+      </Card>
+
+      {/* Custos alocados do projeto */}
+      <Card className="mt-6 p-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
+          <span className="font-medium">Custos alocados ({allocatedCosts.length})</span>
+          <Link to="/financeiro" className="text-sm text-brand-dark hover:underline">abrir financeiro</Link>
+        </div>
+        {allocatedCosts.length === 0 ? (
+          <p className="p-4 text-sm text-neutral-400">Nenhum custo alocado ainda. Aloque despesas na aba Financeiro.</p>
+        ) : (
+          <ul className="divide-y divide-neutral-100">
+            {allocatedCosts.map((c) => (
+              <li key={c.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                <span className="text-neutral-600">{c.created_at ? dateBR(c.created_at) : '—'}</span>
+                <div className="flex items-center gap-3">
+                  <span className="font-medium text-danger">{brl(c.amount)}</span>
+                </div>
+              </li>
+            ))}
           </ul>
         )}
       </Card>

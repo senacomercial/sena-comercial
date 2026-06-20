@@ -234,6 +234,7 @@ function Lancamentos() {
 function Contas() {
   const { rows, create, update, remove, isLoading } = useCollection('bills', { order: 'due_date', ascending: true })
   const { rows: categories } = useCollection('categories', { order: 'name', ascending: true })
+  const transactions = useCollection('transactions')
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [viewMode, setViewMode] = useState('grid')
@@ -243,6 +244,26 @@ function Contas() {
     recurring: false, recurrence: 'mensal', occurrences: '12',
   }
   const [form, setForm] = useState(blank)
+
+  const markAsPaid = async (bill) => {
+    try {
+      // Marca a conta como pago
+      await update.mutateAsync({ id: bill.id, status: 'pago' })
+
+      // Cria lançamento automático
+      const transactionType = bill.kind === 'receber' ? 'income' : 'expense'
+      await transactions.create.mutateAsync({
+        description: bill.description,
+        amount: bill.amount,
+        type: transactionType,
+        date: today(),
+        category_id: bill.category_id,
+        status: 'pago',
+      })
+    } catch (err) {
+      console.error('Erro ao marcar como pago:', err)
+    }
+  }
 
   const catOptions = useMemo(() => {
     const wantType = form.kind === 'receber' ? 'income' : 'expense'
@@ -340,7 +361,7 @@ function Contas() {
                   <div className="mt-1 flex items-center justify-end gap-2">
                     <Badge color={r.status === 'pago' ? 'green' : overdue ? 'red' : 'amber'}>{r.status === 'pago' ? 'pago' : 'aberto'}</Badge>
                     {r.status !== 'pago' && (
-                      <button className="text-xs text-success hover:underline" onClick={() => update.mutate({ id: r.id, status: 'pago' })}>baixar</button>
+                      <button className="text-xs text-success hover:underline" onClick={() => markAsPaid(r)}>baixar</button>
                     )}
                     <button className="text-xs text-neutral-400 hover:text-danger" onClick={() => remove.mutate(r.id)}>excluir</button>
                   </div>
@@ -382,7 +403,7 @@ function Contas() {
                     </td>
                     <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
                       {r.status !== 'pago' && (
-                        <button className="text-xs text-success hover:underline" onClick={() => update.mutate({ id: r.id, status: 'pago' })}>baixar</button>
+                        <button className="text-xs text-success hover:underline" onClick={() => markAsPaid(r)}>baixar</button>
                       )}
                       <button className="text-xs text-neutral-400 hover:text-danger" onClick={() => remove.mutate(r.id)}>excluir</button>
                     </td>

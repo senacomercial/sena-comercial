@@ -31,18 +31,20 @@ export default function ProjetoForm({ open, onClose, editing, defaultClientId })
   useEffect(() => {
     if (!open) return
     if (editing) {
+      const hasExistingReceivable = !!editing.receivable_value
       setForm({
         ...blank,
         name: editing.name, client_id: editing.client_id || '', status: editing.status,
         priority: editing.priority, deadline: editing.deadline || today(), progress: editing.progress || 0,
-        has_receivable: !!editing.receivable_value,
+        has_receivable: hasExistingReceivable,
         receivable_value: editing.receivable_value ?? '',
         is_recurring: editing.is_recurring ?? true,
         recurrence: editing.recurrence || 'mensal',
         payment_start: editing.payment_start || today(),
         installments: String(editing.installments || 1),
         category_id: editing.category_id || '',
-        regenerate: false,
+        // Se o projeto não tinha financeiro antes, regenerate começa true para criar bills
+        regenerate: !hasExistingReceivable,
       })
     } else {
       setForm({ ...blank, client_id: defaultClientId || '' })
@@ -159,7 +161,15 @@ export default function ProjetoForm({ open, onClose, editing, defaultClientId })
         {/* Financeiro do projeto */}
         <div className="rounded-lg border border-neutral-200 p-3">
           <label className="flex items-center gap-2 text-sm font-medium">
-            <input type="checkbox" checked={form.has_receivable} onChange={(e) => setForm({ ...form, has_receivable: e.target.checked })} />
+            <input
+              type="checkbox"
+              checked={form.has_receivable}
+              onChange={(e) => {
+                const newVal = e.target.checked
+                // Se está ativando recebimento durante edição, marca para regenerar
+                setForm({ ...form, has_receivable: newVal, regenerate: editing && newVal ? true : form.regenerate })
+              }}
+            />
             Este projeto tem recebimento do cliente
           </label>
 

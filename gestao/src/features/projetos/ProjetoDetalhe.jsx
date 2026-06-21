@@ -30,12 +30,16 @@ export default function ProjetoDetalhe() {
   const [editOpen, setEditOpen] = useState(false)
   const [taskOpen, setTaskOpen] = useState(false)
   const [billOpen, setBillOpen] = useState(false)
+  const [costOpen, setCostOpen] = useState(false)
   const blankTask = { title: '', priority: 'media', status: 'a_fazer', due_date: today() }
   const [taskForm, setTaskForm] = useState(blankTask)
   const blankBill = { description: '', amount: '', due_date: today() }
   const [billForm, setBillForm] = useState(blankBill)
+  const blankCost = { transaction_id: '', amount: '' }
+  const [costForm, setCostForm] = useState(blankCost)
   const [dragId, setDragId] = useState(null)
   const { rows: categories } = useCollection('categories', { order: 'name', ascending: true })
+  const expenses = useCollection('transactions', { order: 'date' })
 
   const project = projects.rows.find((p) => p.id === projectId)
   const client = clients.rows.find((c) => c.id === project?.client_id)
@@ -77,6 +81,17 @@ export default function ProjetoDetalhe() {
     })
     setBillOpen(false)
     setBillForm(blankBill)
+  }
+
+  const saveCost = async (e) => {
+    e.preventDefault()
+    await projectCosts.create.mutateAsync({
+      project_id: projectId,
+      transaction_id: costForm.transaction_id,
+      amount: Number(costForm.amount),
+    })
+    setCostOpen(false)
+    setCostForm(blankCost)
   }
 
   const onDrop = (status) => {
@@ -166,7 +181,10 @@ export default function ProjetoDetalhe() {
       <Card className="mt-6 p-0">
         <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
           <span className="font-medium">Custos alocados ({allocatedCosts.length})</span>
-          <Link to="/financeiro" className="text-sm text-brand-dark hover:underline">abrir financeiro</Link>
+          <div className="flex gap-2">
+            <button onClick={() => setCostOpen(true)} className="text-sm text-brand-dark hover:underline">+ Custo</button>
+            <Link to="/financeiro" className="text-sm text-brand-dark hover:underline">abrir financeiro</Link>
+          </div>
         </div>
         {allocatedCosts.length === 0 ? (
           <p className="p-4 text-sm text-neutral-400">Nenhum custo alocado ainda. Aloque despesas na aba Financeiro.</p>
@@ -260,6 +278,37 @@ export default function ProjetoDetalhe() {
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => setBillOpen(false)}>Cancelar</Button>
             <Button type="submit">Salvar</Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal open={costOpen} onClose={() => setCostOpen(false)} title="Alocar custo ao projeto">
+        <form onSubmit={saveCost} className="space-y-3">
+          <Select label="Selecione a despesa" value={costForm.transaction_id} onChange={(e) => setCostForm({ ...costForm, transaction_id: e.target.value })} required>
+            <option value="">— Selecione —</option>
+            {transactions.rows
+              .filter((t) => t.type === 'expense')
+              .map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.description} ({dateBR(t.date)}) - {brl(t.amount)}
+                </option>
+              ))}
+          </Select>
+          <Input
+            label="Valor a alocar (R$)"
+            type="number"
+            step="0.01"
+            value={costForm.amount}
+            onChange={(e) => setCostForm({ ...costForm, amount: e.target.value })}
+            required
+            placeholder="0.00"
+          />
+          <p className="text-xs text-neutral-500">
+            Você pode alocar apenas parte da despesa. Se alocar a mesma despesa para vários projetos, o custo se divide entre eles.
+          </p>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setCostOpen(false)}>Cancelar</Button>
+            <Button type="submit">Alocar</Button>
           </div>
         </form>
       </Modal>

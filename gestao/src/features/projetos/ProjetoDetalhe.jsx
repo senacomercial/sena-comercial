@@ -29,9 +29,13 @@ export default function ProjetoDetalhe() {
 
   const [editOpen, setEditOpen] = useState(false)
   const [taskOpen, setTaskOpen] = useState(false)
+  const [billOpen, setBillOpen] = useState(false)
   const blankTask = { title: '', priority: 'media', status: 'a_fazer', due_date: today() }
   const [taskForm, setTaskForm] = useState(blankTask)
+  const blankBill = { description: '', amount: '', due_date: today() }
+  const [billForm, setBillForm] = useState(blankBill)
   const [dragId, setDragId] = useState(null)
+  const { rows: categories } = useCollection('categories', { order: 'name', ascending: true })
 
   const project = projects.rows.find((p) => p.id === projectId)
   const client = clients.rows.find((c) => c.id === project?.client_id)
@@ -59,6 +63,22 @@ export default function ProjetoDetalhe() {
     setTaskOpen(false)
     setTaskForm(blankTask)
   }
+
+  const saveBill = async (e) => {
+    e.preventDefault()
+    await bills.create.mutateAsync({
+      description: billForm.description,
+      amount: Number(billForm.amount),
+      due_date: billForm.due_date,
+      kind: 'receber',
+      status: 'aberto',
+      project_id: projectId,
+      client_id: project?.client_id || null,
+    })
+    setBillOpen(false)
+    setBillForm(blankBill)
+  }
+
   const onDrop = (status) => {
     if (dragId) tasks.update.mutate({ id: dragId, status })
     setDragId(null)
@@ -113,7 +133,10 @@ export default function ProjetoDetalhe() {
       <Card className="mt-6 p-0">
         <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
           <span className="font-medium">Recebimentos ({projectBills.length})</span>
-          <Link to="/financeiro" className="text-sm text-brand-dark hover:underline">abrir financeiro</Link>
+          <div className="flex gap-2">
+            <button onClick={() => setBillOpen(true)} className="text-sm text-brand-dark hover:underline">+ Recebimento</button>
+            <Link to="/financeiro" className="text-sm text-brand-dark hover:underline">abrir financeiro</Link>
+          </div>
         </div>
         {projectBills.length === 0 ? (
           <p className="p-4 text-sm text-neutral-400">Nenhum recebimento. Edite o projeto e configure o financeiro.</p>
@@ -222,6 +245,20 @@ export default function ProjetoDetalhe() {
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => setTaskOpen(false)}>Cancelar</Button>
+            <Button type="submit">Salvar</Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal open={billOpen} onClose={() => setBillOpen(false)} title="Adicionar recebimento">
+        <form onSubmit={saveBill} className="space-y-3">
+          <Input label="Descrição" value={billForm.description} onChange={(e) => setBillForm({ ...billForm, description: e.target.value })} required />
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="Valor (R$)" type="number" step="0.01" value={billForm.amount} onChange={(e) => setBillForm({ ...billForm, amount: e.target.value })} required />
+            <Input label="Vencimento" type="date" value={billForm.due_date} onChange={(e) => setBillForm({ ...billForm, due_date: e.target.value })} required />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setBillOpen(false)}>Cancelar</Button>
             <Button type="submit">Salvar</Button>
           </div>
         </form>

@@ -39,7 +39,6 @@ export default function ProjetoDetalhe() {
   const [costForm, setCostForm] = useState(blankCost)
   const [dragId, setDragId] = useState(null)
   const { rows: categories } = useCollection('categories', { order: 'name', ascending: true })
-  const expenses = useCollection('transactions', { order: 'date' })
 
   const project = projects.rows.find((p) => p.id === projectId)
   const client = clients.rows.find((c) => c.id === project?.client_id)

@@ -50,7 +50,7 @@ function Lancamentos() {
   const { rows, create, update, remove, isLoading } = useCollection('transactions', { order: 'date' })
   const { rows: categories } = useCollection('categories', { order: 'name', ascending: true })
   const { rows: projects } = useCollection('projects', { order: 'name', ascending: true })
-  const { rows: projectCosts } = useCollection('project_costs')
+  const { rows: projectCosts, create: createCost } = useCollection('project_costs')
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const [allocating, setAllocating] = useState(null)
@@ -64,7 +64,7 @@ function Lancamentos() {
     return { income, expense, balance: income - expense }
   }, [rows])
 
-  const blank = { description: '', amount: '', type: 'income', date: today(), category: '', category_id: '', subcategory_id: '', status: 'pago' }
+  const blank = { description: '', amount: '', type: 'income', date: today(), category: '', category_id: '', subcategory_id: '', status: 'pago', selectedProjects: [] }
   const [form, setForm] = useState(blank)
 
   // Categorias-pai filtradas pelo tipo selecionado.
@@ -88,8 +88,20 @@ function Lancamentos() {
       if (cat.parent_id) { category_id = cat.parent_id; subcategory_id = cat.id }
       else { category_id = cat.id }
     }
-    setForm({ description: r.description, amount: r.amount, type: r.type, date: r.date, category: r.category || '', category_id, subcategory_id, status: r.status })
+    setForm({ description: r.description, amount: r.amount, type: r.type, date: r.date, category: r.category || '', category_id, subcategory_id, status: r.status, selectedProjects: [] })
     setOpen(true)
+  }
+
+  const toggleProject = (projectId) => {
+    setForm((f) => {
+      const exists = f.selectedProjects.includes(projectId)
+      return {
+        ...f,
+        selectedProjects: exists
+          ? f.selectedProjects.filter((id) => id !== projectId)
+          : [...f.selectedProjects, projectId],
+      }
+    })
   }
 
   const save = async (e) => {
@@ -108,8 +120,21 @@ function Lancamentos() {
       category_id: finalCatId,
       category: categoryText, // texto usado nos gráficos do dashboard
     }
-    if (editing) await update.mutateAsync({ id: editing.id, ...payload })
-    else await create.mutateAsync(payload)
+    let transaction
+    if (editing) transaction = await update.mutateAsync({ id: editing.id, ...payload })
+    else transaction = await create.mutateAsync(payload)
+
+    // Se for despesa e tiver projetos selecionados, distribui o custo igualmente entre eles.
+    if (form.type === 'expense' && form.selectedProjects.length > 0 && transaction?.id) {
+      const amountPerProject = Math.round((Number(form.amount) / form.selectedProjects.length) * 100) / 100
+      for (const projectId of form.selectedProjects) {
+        await createCost.mutateAsync({
+          project_id: projectId,
+          transaction_id: transaction.id,
+          amount: amountPerProject,
+        })
+      }
+    }
     setOpen(false)
   }
 
@@ -218,6 +243,38 @@ function Lancamentos() {
               Nenhuma categoria de {form.type === 'income' ? 'receita' : 'despesa'} criada ainda. Crie na aba <strong>Categorias</strong>.
             </p>
           )}
+
+          {/* Alocação a projetos — apenas para despesas e novos lançamentos */}
+          {form.type === 'expense' && !editing && (
+            <div className="rounded-lg border border-neutral-200 p-3">
+              <div className="text-sm font-medium mb-2">Alocar este custo a projetos</div>
+              {projects.length === 0 ? (
+                <p className="text-xs text-neutral-400">Nenhum projeto cadastrado.</p>
+              ) : (
+                <>
+                  <div className="max-h-36 overflow-y-auto space-y-1">
+                    {projects.map((p) => (
+                      <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-neutral-50 rounded px-1 py-0.5">
+                        <input
+                          type="checkbox"
+                          checked={form.selectedProjects.includes(p.id)}
+                          onChange={() => toggleProject(p.id)}
+                        />
+                        {p.name}
+                      </label>
+                    ))}
+                  </div>
+                  {form.selectedProjects.length > 0 && Number(form.amount) > 0 && (
+                    <p className="mt-2 text-xs text-neutral-500">
+                      {brl(Math.round((Number(form.amount) / form.selectedProjects.length) * 100) / 100)} por projeto
+                      ({form.selectedProjects.length} projeto{form.selectedProjects.length > 1 ? 's' : ''} · custo dividido igualmente)
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
             <Button type="submit">Salvar</Button>

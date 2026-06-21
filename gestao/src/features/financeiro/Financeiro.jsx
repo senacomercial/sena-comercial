@@ -265,6 +265,9 @@ function Contas() {
     }
   }
 
+  // Filtra apenas contas em aberto (não mostra contas já pagas)
+  const openBills = useMemo(() => rows.filter((b) => b.status === 'aberto'), [rows])
+
   const catOptions = useMemo(() => {
     const wantType = form.kind === 'receber' ? 'income' : 'expense'
     const parents = categories.filter((c) => !c.parent_id && c.type === wantType)
@@ -337,11 +340,11 @@ function Contas() {
       </div>
       {isLoading ? (
         <p className="text-neutral-400">Carregando…</p>
-      ) : rows.length === 0 ? (
-        <EmptyState title="Nenhuma conta cadastrada" hint="Cadastre contas a pagar ou a receber com vencimento." />
+      ) : openBills.length === 0 ? (
+        <EmptyState title="Nenhuma conta em aberto" hint="Todas as contas foram pagas ou não há contas cadastradas." />
       ) : viewMode === 'grid' ? (
         <div className="grid gap-3 sm:grid-cols-2">
-          {rows.map((r) => {
+          {openBills.map((r) => {
             const d = daysUntil(r.due_date)
             const overdue = r.status === 'aberto' && d != null && d < 0
             return (
@@ -384,9 +387,9 @@ function Contas() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => {
+              {openBills.map((r) => {
                 const d = daysUntil(r.due_date)
-                const overdue = r.status === 'aberto' && d != null && d < 0
+                const overdue = d != null && d < 0
                 return (
                   <tr key={r.id} className="border-b border-neutral-100 last:border-0">
                     <td className="px-4 py-3 font-medium">{dateBR(r.due_date)}</td>
